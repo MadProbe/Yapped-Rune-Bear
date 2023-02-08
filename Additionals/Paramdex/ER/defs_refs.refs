@@ -1,0 +1,454 @@
+ATK_PARAM_ST: 
+spEffectId0 = SpEffectParam;
+spEffectId1 = SpEffectParam;
+spEffectId2 = SpEffectParam;
+spEffectId3 = SpEffectParam;
+spEffectId4 = SpEffectParam
+
+BASECHR_SELECT_MENU_PARAM_ST: 
+chrInitParam = CharaInitParam;
+originChrInitParam = CharaInitParam
+
+BEHAVIOR_PARAM_ST: 
+refId = AtkParam_Pc
+
+BUDDY_PARAM_ST: 
+triggerSpEffectId = SpEffectParam;
+npcParamId = NpcParam;
+npcThinkParamId = NpcThinkParam;
+npcParamId_ridden = NpcParam;
+npcThinkParamId_ridden = NpcThinkParam;
+dopingSpEffect_lv0 = SpEffectParam;
+dopingSpEffect_lv1 = SpEffectParam;
+dopingSpEffect_lv2 = SpEffectParam;
+dopingSpEffect_lv3 = SpEffectParam;
+dopingSpEffect_lv4 = SpEffectParam;
+dopingSpEffect_lv5 = SpEffectParam;
+dopingSpEffect_lv6 = SpEffectParam;
+dopingSpEffect_lv7 = SpEffectParam;
+dopingSpEffect_lv8 = SpEffectParam;
+dopingSpEffect_lv9 = SpEffectParam;
+dopingSpEffect_lv10 = SpEffectParam;
+npcPlayerInitParamId = CharaInitParam
+
+BUDDY_STONE_PARAM_ST: 
+dopingSpEffectId = SpEffectParam
+
+BULLET_PARAM_ST: 
+atkId_Bullet = AtkParam_Pc;
+spEffectIDForShooter = SpEffectParam;
+HitBulletID = Bullet;
+spEffectId0 = SpEffectParam;
+spEffectId1 = SpEffectParam;
+spEffectId2 = SpEffectParam;
+spEffectId3 = SpEffectParam;
+spEffectId4 = SpEffectParam;
+intervalCreateBulletId = Bullet;
+createLimitGroupId = BulletCreateLimitParam
+
+CHARACTER_INIT_PARAM: 
+equip_Wep_Right = EquipParamWeapon;
+equip_Subwep_Right = EquipParamWeapon;
+equip_Wep_Left = EquipParamWeapon;
+equip_Subwep_Left = EquipParamWeapon;
+equip_Helm = EquipParamProtector;
+equip_Armer = EquipParamProtector;
+equip_Gaunt = EquipParamProtector;
+equip_Leg = EquipParamProtector;
+equip_Arrow = EquipParamWeapon;
+equip_Bolt = EquipParamWeapon;
+equip_SubArrow = EquipParamWeapon;
+equip_SubBolt = EquipParamWeapon;
+equip_Accessory01 = EquipParamAccessory;
+equip_Accessory02 = EquipParamAccessory;
+equip_Accessory03 = EquipParamAccessory;
+equip_Accessory04 = EquipParamAccessory;
+equip_Spell_01 = Magic;
+equip_Spell_02 = Magic;
+equip_Spell_03 = Magic;
+equip_Spell_04 = Magic;
+equip_Spell_05 = Magic;
+equip_Spell_06 = Magic;
+equip_Spell_07 = Magic;
+item_01 = EquipParamGoods;
+item_02 = EquipParamGoods;
+item_03 = EquipParamGoods;
+item_04 = EquipParamGoods;
+item_05 = EquipParamGoods;
+item_06 = EquipParamGoods;
+item_07 = EquipParamGoods;
+npcPlayerFaceGenId = FaceParam;
+npcPlayerThinkId = NpcThinkParam;
+equip_Subwep_Right3 = EquipParamWeapon;
+equip_Subwep_Left3 = EquipParamWeapon;
+secondaryItem_01 = EquipParamGoods;
+secondaryItem_02 = EquipParamGoods;
+secondaryItem_03 = EquipParamGoods;
+secondaryItem_04 = EquipParamGoods;
+secondaryItem_05 = EquipParamGoods;
+secondaryItem_06 = EquipParamGoods
+
+CHARMAKEMENUTOP_PARAM_ST: 
+faceParamId = FaceParam
+
+DECAL_PARAM_ST: 
+maskSpeffectId = SpEffectParam
+
+EQUIP_MTRL_SET_PARAM_ST: 
+materialId01 = EquipParamAccessory;
+materialId02 = EquipParamAccessory;
+materialId03 = EquipParamAccessory;
+materialId04 = EquipParamAccessory;
+materialId05 = EquipParamAccessory;
+materialId06 = EquipParamAccessory
+
+EQUIP_PARAM_ACCESSORY_ST: 
+refId = SpEffectParam;
+residentSpEffectId1 = SpEffectParam;
+residentSpEffectId2 = SpEffectParam;
+residentSpEffectId3 = SpEffectParam;
+residentSpEffectId4 = SpEffectParam
+
+EQUIP_PARAM_CUSTOM_WEAPON_ST: 
+baseWepId = EquipParamWeapon;
+gemId = EquipParamGem
+
+EQUIP_PARAM_GEM_ST: 
+spEffectId0 = SpEffectParam;
+spEffectId1 = SpEffectParam;
+spEffectId2 = SpEffectParam;
+swordArtsParamId = SwordArtsParam;
+spEffectId_forAtk0 = SpEffectParam;
+spEffectId_forAtk1 = SpEffectParam;
+spEffectId_forAtk2 = SpEffectParam
+
+EQUIP_PARAM_GOODS_ST: 
+refId_default = SpEffectParam;
+refId_1 = SpEffectParam;
+refVirtualWepId = EquipParamWeapon;
+reinforceGoodsId = EquipParamGoods;
+reinforceMaterialId = EquipMtrlSetParam
+
+EQUIP_PARAM_PROTECTOR_ST: 
+residentSpEffectId = SpEffectParam;
+residentSpEffectId2 = SpEffectParam;
+residentSpEffectId3 = SpEffectParam;
+materialSetId = EquipMtrlSetParam;
+originEquipPro = EquipParamProtector;
+originEquipPro1 = EquipParamProtector;
+originEquipPro2 = EquipParamProtector;
+originEquipPro3 = EquipParamProtector;
+originEquipPro4 = EquipParamProtector;
+originEquipPro5 = EquipParamProtector;
+originEquipPro6 = EquipParamProtector;
+originEquipPro7 = EquipParamProtector;
+originEquipPro8 = EquipParamProtector;
+originEquipPro9 = EquipParamProtector;
+originEquipPro10 = EquipParamProtector;
+originEquipPro11 = EquipParamProtector;
+originEquipPro12 = EquipParamProtector;
+originEquipPro13 = EquipParamProtector;
+originEquipPro14 = EquipParamProtector;
+originEquipPro15 = EquipParamProtector;
+reinforceTypeId = ReinforceParamProtector
+
+EQUIP_PARAM_WEAPON_ST: 
+behaviorVariationId = BehaviorParam_PC;
+spEffectBehaviorId0 = SpEffectParam;
+spEffectBehaviorId1 = SpEffectParam;
+spEffectBehaviorId2 = SpEffectParam;
+residentSpEffectId = SpEffectParam;
+residentSpEffectId1 = SpEffectParam;
+residentSpEffectId2 = SpEffectParam;
+materialSetId = materialSetId;
+originEquipWep = EquipParamWeapon;
+originEquipWep1 = EquipParamWeapon;
+originEquipWep2 = EquipParamWeapon;
+originEquipWep3 = EquipParamWeapon;
+originEquipWep4 = EquipParamWeapon;
+originEquipWep5 = EquipParamWeapon;
+originEquipWep6 = EquipParamWeapon;
+originEquipWep7 = EquipParamWeapon;
+originEquipWep8 = EquipParamWeapon;
+originEquipWep9 = EquipParamWeapon;
+originEquipWep10 = EquipParamWeapon;
+originEquipWep11 = EquipParamWeapon;
+originEquipWep12 = EquipParamWeapon;
+originEquipWep13 = EquipParamWeapon;
+originEquipWep14 = EquipParamWeapon;
+originEquipWep15 = EquipParamWeapon;
+reinforceTypeId = ReinforceParamWeapon;
+correctType_Physics = CalcCorrectGraph;
+correctType_Magic = CalcCorrectGraph;
+correctType_Fire = CalcCorrectGraph;
+correctType_Thunder = CalcCorrectGraph;
+correctType_Dark = CalcCorrectGraph;
+correctType_Poison = CalcCorrectGraph;
+correctType_Blood = CalcCorrectGraph;
+swordArtsParamId = SwordArtsParam;
+attackElementCorrectId = AttackElementCorrectParam;
+correctType_Sleep = CalcCorrectGraph;
+correctType_Madness = CalcCorrectGraph;
+originEquipWep16 = EquipParamWeapon;
+originEquipWep17 = EquipParamWeapon;
+originEquipWep18 = EquipParamWeapon;
+originEquipWep19 = EquipParamWeapon;
+originEquipWep20 = EquipParamWeapon;
+originEquipWep21 = EquipParamWeapon;
+originEquipWep22 = EquipParamWeapon;
+originEquipWep23 = EquipParamWeapon;
+originEquipWep24 = EquipParamWeapon;
+originEquipWep25 = EquipParamWeapon
+
+GAME_SYSTEM_COMMON_PARAM_ST: 
+sleepCollectorItemActionButtonParamId = ActionButtonParam;
+onBuddySummon_inActivateRange_spEffectId_pc = SpEffectParam;
+onBuddySummon_inWarnRange_spEffectId_pc = SpEffectParam;
+onBuddySummon_atBuddyUnsummon_spEffectId_pc = SpEffectParam;
+onBuddySummon_inWarnRange_spEffectId_buddy = SpEffectParam;
+sleepCollectorSpEffectId = SpEffectParam;
+bigRuneGreaterDemonBreakInGoodsId = EquipParamGoods;
+enemySpEffectIdAfterSleepCollectorItemLot = SpEffectParam;
+enemyDetectionSpEffect_BulletId_byCoopRing_RedHunter = Bullet;
+enemyDetectionSpEffect_BulletId_byInvadeOrb_None = Bullet;
+activityOfDeadSpEffect_BulletId = Bullet;
+enemyDetectionSpEffect_BulletId_byNpcEnemy = Bullet;
+activityOfDeadTargetSearchSpEffect_OnHitSpEffect = SpEffect;
+pickUpBerserkerSignSpEffectBulletId = Bullet;
+succeedBerserkerSelfKillingEffectId = SpEffect;
+hostModeCostItemId = EquipParamGoods;
+msbEventGeomTreasureInfo_actionButtonParamId_corpse = ActionButtonParam;
+msbEventGeomTreasureInfo_actionButtonParamId_box = ActionButtonParam;
+msbEventGeomTreasureInfo_actionButtonParamId_shine = ActionButtonParam;
+OldMonkOfYellow_CreateSignSpEffectId = SpEffectParam;
+SpEffectId_EnableUseItem_StragglerActivate = SpEffectParam;
+SpEffectId_StragglerWakeUp = SpEffectParam;
+SpEffectId_StragglerTarget = SpEffectParam;
+SpEffectId_StragglerOppose = SpEffectParam;
+bigRuneGreaterDemon_SummonBuddySpecialEffectId_Buddy = SpEffectParam;
+bigRuneGreaterDemon_SummonBuddySpecialEffectId_Pc = SpEffectParam;
+breakIn_A_rebreakInGoodsId = EquipParamGoods;
+rideJumpoff_SpEffectId = SpEffectParam;
+rideJumpoff_SpEffectIdPc = SpEffectParam;
+breakInOnce_A_rebreakInGoodsId = EquipParamGoods;
+breakIn_B_rebreakInGoodsId = EquipParamGoods
+
+GESTURE_PARAM_ST: 
+itemId = EquipParamGoods
+
+HIT_MTRL_PARAM_ST: 
+aiVolumeRate = SpEffectParam;
+spEffectIdOnHit0 = SpEffectParam;
+spEffectIdOnHit1 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_2 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_3 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_4 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_5 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_6 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_7 = SpEffectParam;
+spEffectIdOnHit0_ClearCount_8 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_2 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_3 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_4 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_5 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_6 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_7 = SpEffectParam;
+spEffectIdOnHit1_ClearCount_8 = SpEffectParam;
+replaceMateiralId_Rain = HitMtrlParam;
+spEffectId_forWet00 = SpEffectParam;
+spEffectId_forWet01 = SpEffectParam;
+spEffectId_forWet02 = SpEffectParam;
+spEffectId_forWet03 = SpEffectParam;
+spEffectId_forWet04 = SpEffectParam
+
+ITEMLOT_PARAM_ST: 
+lotItemId01 = EquipParamAccessory;
+lotItemId02 = EquipParamAccessory;
+lotItemId03 = EquipParamAccessory;
+lotItemId04 = EquipParamAccessory;
+lotItemId05 = EquipParamAccessory;
+lotItemId06 = EquipParamAccessory;
+lotItemId07 = EquipParamAccessory;
+lotItemId08 = EquipParamAccessory
+
+MAGIC_PARAM_ST: 
+refId1 = AtkParam_Pc;
+refId2 = AtkParam_Pc;
+refId3 = AtkParam_Pc;
+refId4 = AtkParam_Pc;
+refId6 = AtkParam_Pc;
+refId7 = AtkParam_Pc;
+refId8 = AtkParam_Pc;
+refId9 = AtkParam_Pc;
+refId10 = AtkParam_Pc
+
+MAP_DEFAULT_INFO_PARAM_ST: 
+MapMimicryEstablishmentParamId = MapMimicryEstablishmentParam
+
+MAP_PIECE_TEX_PARAM_ST: 
+multiPlayAreaId = PlayRegionParam
+
+MULTI_PLAY_CORRECTION_PARAM_ST: 
+client1SpEffectId = SpEffectParam;
+client2SpEffectId = SpEffectParam;
+client3SpEffectId = SpEffectParam
+
+NPC_PARAM_ST: 
+behaviorVariationId = BehaviorParam;
+resistCorrectId_poison = ResistCorrectParam;
+itemLotId_enemy = ItemLotParam_enemy;
+itemLotId_map = ItemLotParam_map;
+spEffectID0 = SpEffectParam;
+spEffectID1 = SpEffectParam;
+spEffectID2 = SpEffectParam;
+spEffectID3 = SpEffectParam;
+spEffectID4 = SpEffectParam;
+spEffectID5 = SpEffectParam;
+spEffectID6 = SpEffectParam;
+spEffectID7 = SpEffectParam;
+GameClearSpEffectID = SpEffectParam;
+spEffectID8 = SpEffectParam;
+spEffectID9 = SpEffectParam;
+spEffectID10 = SpEffectParam;
+spEffectID11 = SpEffectParam;
+spEffectID12 = SpEffectParam;
+spEffectID13 = SpEffectParam;
+spEffectID14 = SpEffectParam;
+spEffectID15 = SpEffectParam;
+resistCorrectId_disease = ResistCorrectParam;
+phantomShaderId = PhantomParam;
+multiPlayCorrectionParamId = MultiPlayCorrectionParam;
+lockCameraParamId = LockCamParam;
+spEffectID16 = SpEffectParam;
+spEffectID17 = SpEffectParam;
+spEffectID18 = SpEffectParam;
+spEffectID19 = SpEffectParam;
+spEffectID20 = SpEffectParam;
+spEffectID21 = SpEffectParam;
+spEffectID22 = SpEffectParam;
+spEffectID23 = SpEffectParam;
+spEffectID24 = SpEffectParam;
+spEffectID25 = SpEffectParam;
+spEffectID26 = SpEffectParam;
+spEffectID27 = SpEffectParam;
+spEffectID28 = SpEffectParam;
+spEffectID29 = SpEffectParam;
+spEffectID30 = SpEffectParam;
+spEffectID31 = SpEffectParam;
+estusFlaskRecoveryParamId = HPEstusFlaskRecoveryParam;
+residentMaterialExParamId00 = MaterialExParam;
+residentMaterialExParamId01 = MaterialExParam;
+residentMaterialExParamId02 = MaterialExParam;
+residentMaterialExParamId03 = MaterialExParam;
+residentMaterialExParamId04 = MaterialExParam;
+sleepCollectorItemLotId_enemy = ItemLotParam_enemy;
+sleepCollectorItemLotId_map = ItemLotParam_map;
+resistCorrectId_blood = ResistCorrectParam;
+resistCorrectId_curse = ResistCorrectParam;
+resistCorrectId_freeze = ResistCorrectParam;
+resistCorrectId_sleep = ResistCorrectParam;
+resistCorrectId_madness = ResistCorrectParam
+
+NPC_THINK_PARAM_ST: 
+spEffectId_RangedAttack = SpEffectParam;
+weaponOffSpecialEffectId = SpEffectParam;
+weaponOnSpecialEffectId = SpEffectParam
+
+OBJ_ACT_PARAM_ST: 
+actionButtonParamId = ActionButtonParam
+
+OBJECT_PARAM_ST: 
+breakBulletBehaviorId = BehaviorParam;
+burnBulletBehaviorId = BehaviorParam;
+burnBulletBehaviorId_1 = BehaviorParam;
+burnBulletBehaviorId_2 = BehaviorParam;
+burnBulletBehaviorId_3 = BehaviorParam
+
+PLAYER_COMMON_PARAM_ST: 
+resistCurseItemId = EquipParamGoods;
+resistCurseItemSpEffectBaseId = SpEffectParam;
+resistCurseItemLotParamId_map = ItemLotParam_map
+
+ROLE_PARAM_ST: 
+spEffectID0 = SpEffectParam;
+spEffectID1 = SpEffectParam;
+spEffectID2 = SpEffectParam;
+spEffectID3 = SpEffectParam;
+spEffectID4 = SpEffectParam;
+spEffectID5 = SpEffectParam;
+spEffectID6 = SpEffectParam;
+spEffectID7 = SpEffectParam;
+spEffectID8 = SpEffectParam;
+spEffectID9 = SpEffectParam;
+itemlotParamId = ItemLotParam_map;
+phantomParamId_vowRank1 = PhantomParam;
+phantomParamId_vowRank2 = PhantomParam;
+phantomParamId_vowRank3 = PhantomParam;
+spEffectID_vowRank0 = SpEffectParam;
+spEffectID_vowRank1 = SpEffectParam;
+spEffectID_vowRank2 = SpEffectParam;
+spEffectID_vowRank3 = SpEffectParam
+
+SHOP_LINEUP_PARAM: 
+equipId = EquipParamAccessory;
+mtrlId = EquipMtrlSetParam
+
+SP_EFFECT_PARAM_ST: 
+behaviorId = BehaviorParam_PC;
+replaceSpEffectId = SpEffectParam;
+cycleOccurrenceSpEffectId = SpEffectParam;
+atkOccurrenceSpEffectId = SpEffectParam;
+vfxId = SpEffectVfxParam;
+vfxId1 = SpEffectVfxParam;
+vfxId2 = SpEffectVfxParam;
+vfxId3 = SpEffectVfxParam;
+vfxId4 = SpEffectVfxParam;
+vfxId5 = SpEffectVfxParam;
+vfxId6 = SpEffectVfxParam;
+vfxId7 = SpEffectVfxParam;
+addFootEffectSfxId = FootSfxParam;
+applyIdOnGetSoul = SpEffectParam
+
+SP_EFFECT_SET_PARAM_ST: 
+spEffectId1 = SpEffectParam;
+spEffectId2 = SpEffectParam;
+spEffectId3 = SpEffectParam;
+spEffectId4 = SpEffectParam
+
+SP_EFFECT_VFX_PARAM_ST: 
+decalId1 = DecalParam;
+decalId2 = DecalParam;
+phantomParamOverwriteType = PhantomParam;
+materialParamId = MaterialExParam
+
+TALK_PARAM_ST: 
+spEffectId0 = SpEffectParam;
+spEffectId1 = SpEffectParam
+
+TOUGHNESS_PARAM_ST: 
+spEffectId = SpEffectParam
+
+WEATHER_LOT_PARAM_ST: 
+weatherType0 = WeatherParam;
+weatherType1 = WeatherParam;
+weatherType2 = WeatherParam;
+weatherType3 = WeatherParam;
+weatherType4 = WeatherParam;
+weatherType5 = WeatherParam;
+weatherType6 = WeatherParam;
+weatherType7 = WeatherParam;
+weatherType8 = WeatherParam;
+weatherType9 = WeatherParam;
+weatherType10 = WeatherParam;
+weatherType11 = WeatherParam;
+weatherType12 = WeatherParam;
+weatherType13 = WeatherParam;
+weatherType14 = WeatherParam;
+weatherType15 = WeatherParam
+
+WEATHER_PARAM_ST: 
+WetSpEffectId00 = SpEffectParam;
+WetSpEffectId01 = SpEffectParam;
+WetSpEffectId02 = SpEffectParam;
+WetSpEffectId03 = SpEffectParam;
+WetSpEffectId04 = SpEffectParam

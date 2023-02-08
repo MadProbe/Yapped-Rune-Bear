@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="Forms\DataSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FieldAdjuster.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FieldExporter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FieldReferenceSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FilterSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FindField.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\FindRow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\GoToRow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\InterfaceSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\NewRow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RowReferenceSearch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\SettingsMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
