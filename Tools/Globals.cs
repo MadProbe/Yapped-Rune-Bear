@@ -193,7 +193,10 @@ namespace Chomp.Tools {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string[]? GetCellReferences(this Cell cell) => Main.refs_dict[cell.Def.Def.ParamType]?[cell.Def.InternalName];
         public static bool AddNoReplacement<T>(this List<T> list, T item) {
-            if (list.Contains(item)) return false;
+            if (list.Contains(item)) {
+                return false;
+            }
+
             list.Add(item);
             return true;
         }

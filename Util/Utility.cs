@@ -1,5 +1,4 @@
-﻿using SoulsFormats;
-using SoulsFormats.Binder.BND4;
+﻿using SoulsFormats.Binder.BND4;
 using SoulsFormats.Util;
 
 namespace Chomp.Util {

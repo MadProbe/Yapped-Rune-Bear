@@ -28,6 +28,18 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AssemblyVersion>2.2.0.0</AssemblyVersion>
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+		<FileVersion>2.2.0.0</FileVersion>
+		<Version>2.2.0</Version>
+		<Description>Modding source of .bin file of From Software Souls games</Description>
+		<Copyright>MadProbe, vawser, unknown (creators that have made the project before vawser picked up it and updated)</Copyright>
+		<PackageProjectUrl>https://github.com/MadProbe/Yapped-Rune-Bear</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/MadProbe/Yapped-Rune-Bear</RepositoryUrl>
+		<PackageReleaseNotes>Decompile, fix and optimize the code.
+Now when exporting mod directory is created if it didn't exist.</PackageReleaseNotes>
+		<Company />
+		<Authors>MadProbe, vawser &amp; others</Authors>
+		<Title>Yapped Rune Bear Special Edition</Title>
     </PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>1701;1702;0649;0169;CA1050</NoWarn>
@@ -157,6 +169,10 @@
 		<None Include="Properties\Settings.settings">
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+		<None Include="README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 	<ItemGroup>

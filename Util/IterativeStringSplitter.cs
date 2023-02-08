@@ -8,7 +8,7 @@
         public IterativeStringSplitter(ReadOnlySpan<char> value, char* separator, int separator_length) {
             fixed (char* valuePtr = value) {
                 this._seperator = separator;
-                this._safe_range = (this._endp = (this._value = valuePtr) + value.Length) - (_sep_length = separator_length);
+                this._safe_range = (this._endp = (this._value = valuePtr) + value.Length) - (this._sep_length = separator_length);
             }
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -19,7 +19,10 @@
             int s;
             for (; this._value <= this._endp; this._value++) {
                 if (this._safe_range >= this._value) {
-                    for (s = 0; s < this._sep_length && this._value[s] == this._seperator[s]; s++) ;
+                    for (s = 0; s < this._sep_length && this._value[s] == this._seperator[s]; s++) {
+                        ;
+                    }
+
                     if (s == this._sep_length) {
                         result = this._value;
                         this._value += s;

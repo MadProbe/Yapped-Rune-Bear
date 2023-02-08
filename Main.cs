@@ -1470,6 +1470,7 @@ namespace Chomp {
             if (!isSilent && File.Exists(paramPath) && MessageBox.Show($"{paramPath} exists. Overwrite?", "Export Data", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No) {
                 return;
             }
+            Directory.CreateDirectory(this.GetProjectDirectory("CSV"));
             using (var output_file = new StreamWriter(paramPath, new FileStreamOptions {
                 BufferSize = 0x1000,
                 Access = FileAccess.Write,
