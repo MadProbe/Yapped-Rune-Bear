@@ -1,0 +1,233 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ProjectGuid>{0DC575E8-A3CF-4275-8094-EC863F0EA532}</ProjectGuid>
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>Chomp</RootNamespace>
+		<AssemblyName>Yapped-Rune-Bear</AssemblyName>
+		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+		<FileAlignment>512</FileAlignment>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<Nullable>annotations</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWindowsForms>True</UseWindowsForms>
+		<PlatformTarget>x64</PlatformTarget>
+		<Platforms>x64</Platforms>
+		<TieredPGO>True</TieredPGO>
+		<PublishTrimmed>False</PublishTrimmed>
+		<SelfContained>True</SelfContained>
+		<PublishAot>True</PublishAot>
+	</PropertyGroup>
+	<PropertyGroup>
+		<EnableDefaultItems>False</EnableDefaultItems>
+	</PropertyGroup>
+	<PropertyGroup>
+		<StartupObject>Program</StartupObject>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<EnablePreviewFeatures>True</EnablePreviewFeatures>
+		<SignAssembly>False</SignAssembly>
+		<IncludeSymbols>False</IncludeSymbols>
+		<ErrorReport>prompt</ErrorReport>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+		<ApplicationIcon>./Yapped-Rune-Bear.ico</ApplicationIcon>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<AssemblyVersion>2.2.2.0</AssemblyVersion>
+		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+		<FileVersion>2.2.2.0</FileVersion>
+		<Version>2.2.2</Version>
+		<Description>Modding source of .bin file of From Software Souls games</Description>
+		<Copyright>MadProbe, vawser, JKAnderson</Copyright>
+		<PackageProjectUrl>https://github.com/MadProbe/Yapped-Rune-Bear</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/MadProbe/Yapped-Rune-Bear</RepositoryUrl>
+		<PackageReleaseNotes>
+			Decompile, fix and optimize the code.
+			Now when exporting mod directory is created if it didn't exist.
+		</PackageReleaseNotes>
+		<Company />
+		<Authors>MadProbe, vawser &amp; JKAnderson</Authors>
+		<Title>Yapped Rune Bear Special Edition</Title>
+		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702;0649;0169;CA1050</NoWarn>
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>1701;1702;0649;0169;CA1050</NoWarn>
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <DebugType>portable</DebugType>
+	</PropertyGroup>
+	<ItemGroup>
+		<Compile Include="Forms/DataSettings.cs" />
+		<Compile Include="Forms/DataSettings.Designer.cs">
+			<DependentUpon>DataSettings.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FieldAdjuster.cs" />
+		<Compile Include="Forms/FieldAdjuster.Designer.cs">
+			<DependentUpon>FieldAdjuster.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FieldExporter.cs" />
+		<Compile Include="Forms/FieldExporter.Designer.cs">
+			<DependentUpon>FieldExporter.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FieldReferenceSearch.cs" />
+		<Compile Include="Forms/FieldReferenceSearch.Designer.cs">
+			<DependentUpon>FieldReferenceSearch.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FilterSettings.cs" />
+		<Compile Include="Forms/FilterSettings.Designer.cs">
+			<DependentUpon>FilterSettings.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FindField.cs" />
+		<Compile Include="Forms/FindField.Designer.cs">
+			<DependentUpon>FindField.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/FindRow.cs" />
+		<Compile Include="Forms/FindRow.Designer.cs">
+			<DependentUpon>FindRow.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/GoToRow.cs" />
+		<Compile Include="Forms/GoToRow.Designer.cs">
+			<DependentUpon>GoToRow.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/InterfaceSettings.cs" />
+		<Compile Include="Forms/InterfaceSettings.Designer.cs">
+			<DependentUpon>InterfaceSettings.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/NewRow.cs" />
+		<Compile Include="Forms/NewRow.Designer.cs">
+			<DependentUpon>NewRow.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/RowReferenceSearch.cs" />
+		<Compile Include="Forms/RowReferenceSearch.Designer.cs">
+			<DependentUpon>RowReferenceSearch.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Forms/SettingsMenu.cs" />
+		<Compile Include="Forms/SettingsMenu.Designer.cs">
+			<DependentUpon>SettingsMenu.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Main.cs" />
+		<Compile Include="Main.Designer.cs">
+			<DependentUpon>Main.cs</DependentUpon>
+		</Compile>
+		<Compile Include="Program.cs" />
+		<Compile Include="Properties/AssemblyInfo.cs" />
+		<Compile Include="Properties/Resources.cs" />
+		<Compile Include="Properties/Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+		<Compile Include="Properties/Settings.Designer.cs">
+			<DependentUpon>Settings.settings</DependentUpon>
+			<AutoGen>True</AutoGen>
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+		</Compile>
+		<Compile Include="Tools/AffinityGeneration.cs" />
+		<Compile Include="Tools/Globals.cs" />
+		<Compile Include="Tools/SafeDictionary.cs" />
+		<Compile Include="Util/CryptographyUtility.cs" />
+		<Compile Include="Util/GameMode.cs" />
+		<Compile Include="Util/IterativeStringSplitter.cs" />
+		<Compile Include="Util/OPFileWriter.cs" />
+		<Compile Include="Util/ParamWrapper.cs" />
+		<Compile Include="Util/StringToFormula.cs" />
+		<Compile Include="Util/Utility.cs" />
+		<Compile Include="Util\Shenanigans.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="FodyWeavers.xml" />
+		<Content Include="Yapped-Rune-Bear.ico" />
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Forms/DataSettings.resources" />
+		<EmbeddedResource Include="Forms/FieldAdjuster.resx" />
+		<EmbeddedResource Include="Forms/FieldExporter.resx" />
+		<EmbeddedResource Include="Forms/FieldReferenceSearch.resx" />
+		<EmbeddedResource Include="Forms/FilterSettings.resources" />
+		<EmbeddedResource Include="Forms/GoToRow.resx" />
+		<!--<EmbeddedResource Include="Forms/InterfaceSettings.resources" />-->
+		<EmbeddedResource Include="Forms/InterfaceSettings.resx" />
+		<EmbeddedResource Include="Forms/NewRow.resources" />
+		<EmbeddedResource Include="Forms/RowReferenceSearch.resx" />
+		<!--<EmbeddedResource Include="Forms/SettingsMenu.resources" />-->
+		<EmbeddedResource Include="Forms/SettingsMenu.resx" />
+		<!--<EmbeddedResource Include="Main.resources" />-->
+		<EmbeddedResource Include="Main.resx" />
+		<EmbeddedResource Include="Properties/Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Yapped_Rune_Bear.Properties.Resources.resources" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="BouncyCastle.Crypto">
+			<HintPath>../Dependencies/BouncyCastle.Crypto.dll</HintPath>
+		</Reference>
+		<Reference Include="ManagedCodeShenanigans">
+			<HintPath>../Dependencies/ManagedCodeShenanigans.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="../.editorconfig" Link=".editorconfig" />
+		<None Include="app.manifest" />
+		<None Include="../Dependencies/oo2core_6_win64.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="Properties/Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.4" PrivateAssets="All" />
+		<PackageReference Include="InlineIL.Fody" Version="1.7.4" PrivateAssets="All" />
+		<PackageReference Include="NameOf.Fody" Version="0.8.4" PrivateAssets="All" />
+		<PackageReference Include="System.Memory" Version="4.5.5" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+		<PackageReference Include="Tail.Fody" Version="0.0.2" PrivateAssets="All">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<Using Include="Chomp" />
+		<Using Include="System.Configuration" />
+		<Using Include="System.Diagnostics" />
+		<Using Include="System.Enum">
+		  <Alias>Enum</Alias>
+		</Using>
+		<Using Include="System.Reflection" />
+		<Using Include="System.Runtime.CompilerServices" />
+		<Using Include="System.Runtime.InteropServices" />
+		<Using Include="System.Text" />
+		<Using Include="UnsafeCode" />
+		<Using Include="UnsafeCode.Pointers">
+			<Static>True</Static>
+		</Using>
+	</ItemGroup>
+	<ItemGroup>
+		<Folder Include="Additionals/**" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
+	</ItemGroup>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="cp.exe -r ./Additionals/* ./$(OutDir)" />
+	</Target>
+</Project>

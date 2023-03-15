@@ -1,4 +1,9 @@
 .vs
 .vscode
+.things
 bin
 obj
+Yapped-Rune-Bear/bin
+Yapped-Rune-Bear/obj
+SoulsFormats/bin
+SoulsFormats/obj

@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net7.0-windows</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Copyright>Copyright © Joseph Anderson 2019</Copyright>
+		<Description>A .NET library for reading and writing FromSoftware file formats.</Description>
+		<Company>JKAnderson</Company>
+		<Authors>Joseph Anderson</Authors>
+		<PackageProjectUrl>https://github.com/JKAnderson/SoulsFormats</PackageProjectUrl>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<TieredPGO>True</TieredPGO>
+		<PublishAot>True</PublishAot>
+		<PublishTrimmed>False</PublishTrimmed>
+		<Nullable>annotations</Nullable>
+		<PlatformTarget>x64</PlatformTarget>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Platforms>x64</Platforms>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-windows|x64'">
+	  <NoWarn>1701;1702;NU1701</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-windows|AnyCPU'">
+	  <NoWarn>1701;1702;NU1701</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-windows|x64'">
+	  <NoWarn>1701;1702;NU1701</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-windows|AnyCPU'">
+	  <NoWarn>1701;1702;NU1701</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.4" PrivateAssets="All">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="InlineIL.Fody" Version="1.7.4" PrivateAssets="All" />
+		<PackageReference Include="NameOf.Fody" Version="0.8.4" PrivateAssets="All" />
+		<PackageReference Include="System.Memory" Version="4.5.5" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+		<PackageReference Include="Tail.Fody" Version="0.0.2" PrivateAssets="All">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="ManagedCodeShenanigans">
+			<HintPath>..\Dependencies\ManagedCodeShenanigans.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="System.Runtime.CompilerServices" />
+		<Using Include="UnsafeCode" />
+		<Using Include="UnsafeCode.Pointers" Static="True" />
+	</ItemGroup>
+</Project>
