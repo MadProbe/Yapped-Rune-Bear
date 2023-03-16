@@ -19,7 +19,7 @@ namespace SoulsFormats.Util {
                 bytes = DCX.Decompress(bytes);
             }
 
-            bool checkMsb(BinaryReaderEx br) {
+            static bool checkMsb(BinaryReaderEx br) {
                 if (br.Length < 8) {
                     return false;
                 }
@@ -36,16 +36,9 @@ namespace SoulsFormats.Util {
                 }
             }
 
-            bool checkParam(BinaryReaderEx br) {
-                if (br.Length < 0x2C) {
-                    return false;
-                }
+            static bool checkParam(BinaryReaderEx br) => br.Length >= 0x2C && MyRegex().IsMatch(br.GetASCII(0xC, 0x20));
 
-                string param = br.GetASCII(0xC, 0x20);
-                return MyRegex().IsMatch(param);
-            }
-
-            bool checkTdf(BinaryReaderEx br) {
+            static bool checkTdf(BinaryReaderEx br) {
                 if (br.Length < 4) {
                     return false;
                 }
@@ -82,7 +75,7 @@ namespace SoulsFormats.Util {
                     ext = ".dds";
                 }
                 // ESD or FFX
-                else if (magic != null && magic.ToUpper() == "DLSE") {
+                else if (magic?.ToUpper() == "DLSE") {
                     ext = ".dlse";
                 } else if (bigEndian && magic == "\0BRD" || !bigEndian && magic == "DRB\0") {
                     ext = ".drb";
@@ -92,7 +85,7 @@ namespace SoulsFormats.Util {
                     ext = ".eld";
                 } else if (magic == "ENFL") {
                     ext = ".entryfilelist";
-                } else if (magic != null && magic.ToUpper() == "FSSL") {
+                } else if (magic?.ToUpper() == "FSSL") {
                     ext = ".esd";
                 } else if (magic == "EVD\0") {
                     ext = ".evd";
@@ -456,16 +449,16 @@ namespace SoulsFormats.Util {
         /// Repacks and encrypts ER's regulation BND4 to the specified path.
         /// </summary>
         public static void EncryptERRegulation(string path, BND4 bnd) {
-            byte[] bytes = bnd.Write();
-            bytes = EncryptByteArray(erRegulationKey, bytes);
             _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllBytes(path, bytes);
+            File.WriteAllBytes(path, EncryptByteArray(erRegulationKey, bnd.Write()));
         }
         private const int IV_SIZE = 128 / 8; // basically 16
         private const int SAFETY_PADDING = 0x100;
 
         private static byte[] EncryptByteArray(byte[] key, byte[] secret) {
-            using var ms = new MemoryStream(GC.AllocateUninitializedArray<byte>(secret.Length + SAFETY_PADDING), true);
+            // Avoid extraneous allocations and copying
+            byte[] bytes = GC.AllocateUninitializedArray<byte>(secret.Length + (0x10 - secret.Length & 0xf) + IV_SIZE);
+            using var ms = new MemoryStream(bytes, IV_SIZE, bytes.Length - IV_SIZE, true);
             using var cryptor = Aes.Create();
             cryptor.Mode = CipherMode.CBC;
             cryptor.Padding = PaddingMode.PKCS7;
@@ -473,17 +466,12 @@ namespace SoulsFormats.Util {
             cryptor.BlockSize = 128;
 
             byte[] iv = cryptor.IV;
+            iv.AsSpan().CopyTo(bytes.AsSpan(0, IV_SIZE));
 
-            using (var cs = new CryptoStream(ms, cryptor.CreateEncryptor(key, iv), CryptoStreamMode.Write, true)) {
-                cs.Write(secret.AsSpan());
-            }
-            byte[] result = GC.AllocateUninitializedArray<byte>(IV_SIZE + (int)ms.Length);
+            using var cs = new CryptoStream(ms, cryptor.CreateEncryptor(key, iv), CryptoStreamMode.Write, true);
 
-            // Avoid extraneous allocations and copying
-            iv.AsSpan().CopyTo(result.AsSpan(0, IV_SIZE));
-            ms.GetInternalBuffer().AsSpan(ms.GetInternalOrigin(), ms.GetInternalOrigin() + (int)ms.Length).CopyTo(result.AsSpan(IV_SIZE));
-
-            return result;
+            cs.Write(secret, 0, secret.Length);
+            return bytes;
         }
 
         private static byte[] DecryptByteArray(byte[] key, byte[] secret) {
@@ -499,8 +487,9 @@ namespace SoulsFormats.Util {
             cryptor.KeySize = 256;
             cryptor.BlockSize = 128;
 
-            using var cs = new CryptoStream(ms, cryptor.CreateDecryptor(key, iv), CryptoStreamMode.Write);
-            cs.Write(secret.AsSpan(IV_SIZE, secret.Length - IV_SIZE));
+            using (var cs = new CryptoStream(ms, cryptor.CreateDecryptor(key, iv), CryptoStreamMode.Write)) {
+                cs.Write(secret.AsSpan(IV_SIZE, secret.Length - IV_SIZE));
+            }
             return ms.ToArray();
         }
 

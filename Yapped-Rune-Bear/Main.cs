@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Media;
 using System.Text.RegularExpressions;
 using Chomp.Forms;
@@ -36,13 +35,13 @@ namespace Chomp {
             this.dgvParams.AutoGenerateColumns = false;
             this.dgvRows.AutoGenerateColumns = false;
             this.dgvCells.AutoGenerateColumns = false;
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
         }
 
         // Token: 0x06000002 RID: 2 RVA: 0x00002158 File Offset: 0x00000358
         private void Main_Load(object sender, EventArgs e) {
-            this.Text = $"Yapped - Rune Bear Special Edition ({Assembly.GetExecutingAssembly().GetName().Version})";
+            this.Text = $"Yapped - Rune Bear Special Edition ({Assembly.GetExecutingAssembly().GetName().Version}, {RuntimeInformation.FrameworkDescription}{(!RuntimeFeature.IsDynamicCodeSupported ? " Native AOT" : "")})";
             this.toolTip_filterParams.SetToolTip(this.filter_Params.Control, this.filter_Params.ToolTipText);
             this.toolTip_filterRows.SetToolTip(this.filter_Rows.Control, this.filter_Rows.ToolTipText);
             this.toolTip_filterCells.SetToolTip(this.filter_Cells.Control, this.filter_Cells.ToolTipText);
@@ -388,12 +387,11 @@ namespace Chomp {
 
         // Token: 0x06000012 RID: 18 RVA: 0x0000312D File Offset: 0x0000132D
         private void SaveToolStripMenuItem_Click(object sender, EventArgs e) {
-            if (this.InvalidationMode) {
-                return;
-            }
-            this.SaveParams(".bak");
-            if (!settings.ShowConfirmationMessages) {
-                _ = MessageBox.Show($"Params saved to {this.regulationPath}", "Save", MessageBoxButtons.OK);
+            if (!this.InvalidationMode) {
+                long ms = Globals.MeasureTimeSpent(() => this.SaveParams(".bak"));
+                if (!settings.ShowConfirmationMessages) {
+                    _ = MessageBox.Show($"Params saved to {this.regulationPath} in {ms} ms", "Save", MessageBoxButtons.OK);
+                }
             }
         }
 

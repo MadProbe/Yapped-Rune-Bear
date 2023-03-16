@@ -59,7 +59,7 @@ namespace Chomp.Util {
             if (this._is_vectorizable = IsHardwareAccelerated & value.Length > CharsInVector256 & separator_length == 1) {
                 this._value = value.AsPointer();
                 this._value_length = value.Length - CharsInVector256;
-                this._separator = *(ushort*)separator;
+                this._separator = *separator;
                 this.InitNextBits();
             } else {
                 this._seperatorp = separator;
@@ -127,7 +127,7 @@ namespace Chomp.Util {
                       Load((ushort*)(this._value + this._value_length))
                           .Compare(Create(this._separator))
                           .ExtractMostSignificantBits(),
-                      (ushort)((this._offset - this._value_length) | 0x1000)
+                      (byte)(this._offset - this._value_length), 16
                  ) | (0x10000u >> (this._offset - this._value_length & 15));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

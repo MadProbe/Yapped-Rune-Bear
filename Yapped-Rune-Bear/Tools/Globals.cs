@@ -3,7 +3,7 @@ using static SoulsFormats.PARAM;
 
 namespace Chomp.Tools {
     internal static class Globals {
-        public static Stopwatch stopwatch = new Stopwatch();
+        public static Stopwatch stopwatch = new ();
         public static Color FromARGB(uint k) => Color.FromArgb(unchecked((int)k));
         public static unsafe void printPointer<T>(T value) => Console.WriteLine(toHex(AsPointer(value)));
 
