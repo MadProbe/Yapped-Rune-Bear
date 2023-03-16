@@ -29,10 +29,10 @@
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<ApplicationIcon>./Yapped-Rune-Bear.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<AssemblyVersion>2.2.3.0</AssemblyVersion>
+		<AssemblyVersion>2.2.4.0</AssemblyVersion>
 		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-		<FileVersion>2.2.3.0</FileVersion>
-		<Version>2.2.3</Version>
+		<FileVersion>2.2.4.0</FileVersion>
+		<Version>2.2.4</Version>
 		<Description>Modding source of .bin file of From Software Souls games</Description>
 		<Copyright>MadProbe, vawser, JKAnderson</Copyright>
 		<PackageProjectUrl>https://github.com/MadProbe/Yapped-Rune-Bear</PackageProjectUrl>

@@ -562,8 +562,8 @@ namespace Chomp {
             if (newRowForm.ShowDialog() == DialogResult.OK) {
                 string name = newRowForm.ResultName;
                 int base_id = newRowForm.ResultID;
-                int repeat_count = Math.Min(settings.NewRow_RepeatCount, 1);
-                int step_value = Math.Min(settings.NewRow_StepValue, 1);
+                int repeat_count = Math.Max(settings.NewRow_RepeatCount, 1);
+                int step_value = Math.Max(settings.NewRow_StepValue, 1);
                 int current_id = base_id;
                 ParamWrapper paramWrapper = this.rowSource.DataSource as ParamWrapper ?? this.ThrowCannotGetParamWrapper<ParamWrapper>();
                 Row newRow;
