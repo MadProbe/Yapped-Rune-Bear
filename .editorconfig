@@ -71,7 +71,7 @@ csharp_style_prefer_range_operator = true:suggestion
 csharp_style_unused_value_expression_statement_preference = discard_variable:silent
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 csharp_style_deconstructed_variable_declaration = true:suggestion
-csharp_style_inlined_variable_declaration = true:suggestion
+csharp_style_inlined_variable_declaration = true:silent
 csharp_style_prefer_readonly_struct = true:suggestion
 csharp_prefer_static_local_function = true:suggestion
 csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true:silent
@@ -92,6 +92,12 @@ csharp_style_var_elsewhere = false:suggestion
 dotnet_diagnostic.CA1416.severity = none
 csharp_space_around_binary_operators = before_and_after
 dotnet_diagnostic.CA1805.severity = suggestion
+
+# IDE0018: Inline variable declaration
+dotnet_diagnostic.IDE0018.severity = silent
+
+# CS9084: Struct member returns 'this' or other instance members by reference
+dotnet_diagnostic.CS9084.severity = none
 
 [*.vb]
 #### Naming styles ####

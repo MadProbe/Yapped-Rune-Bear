@@ -3,6 +3,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 
 namespace Chomp.Util {
+    [SkipLocalsInit]
     public static class VectorExtensions {
         public static Vector256<T> Compare<T>(this Vector256<T> @this, Vector256<T> comparee) where T : struct => Vector256.Equals(comparee, @this);
     }
@@ -42,7 +43,8 @@ namespace Chomp.Util {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string NextString() => new(this.Next());
     }
-    public unsafe ref struct IterativeStringSplitterSmartVectorized {
+    [SkipLocalsInit]
+    public unsafe struct IterativeStringSplitterSmartVectorized {
         const int CharsInVector256 = 256 / 16;
         private readonly bool _is_vectorizable;
         private char* _value;
@@ -64,6 +66,18 @@ namespace Chomp.Util {
             } else {
                 this._seperatorp = separator;
                 this._safe_range = (this._endp = (this._value = value.AsPointer()) + value.Length) - (this._sep_length = separator_length);
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IterativeStringSplitterSmartVectorized(ReadOnlySpan<char> value, ReadOnlySpan<char> separator) {
+            if (this._is_vectorizable = IsHardwareAccelerated & value.Length > CharsInVector256 & separator.Length == 1) {
+                this._value = value.AsPointer();
+                this._value_length = value.Length - CharsInVector256;
+                this._separator = *separator.AsPointer();
+                this.InitNextBits();
+            } else {
+                this._seperatorp = separator.AsPointer();
+                this._safe_range = (this._endp = (this._value = value.AsPointer()) + value.Length) - (this._sep_length = separator.Length);
             }
         }
         public static bool IsVectorizable(ReadOnlySpan<char> chars, int separator_length) => IsHardwareAccelerated & chars.Length > CharsInVector256 & separator_length == 1;

@@ -1096,7 +1096,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "Main";
             this.Padding = new System.Windows.Forms.Padding(2);
-            this.Text = "Yapped <version>";
+            this.Text = "Yapped - Rune Bear Special Edition (<version>, <framework-version>)";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             this.Load += new System.EventHandler(this.Main_Load);
             this.menuStrip1.ResumeLayout(false);

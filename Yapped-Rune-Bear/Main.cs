@@ -14,13 +14,14 @@ using SoulsFormats.Formats;
 using SoulsFormats.Formats.PARAM;
 using SoulsFormats.Util;
 using static SoulsFormats.PARAM;
+using Format = SoulsFormats.Binder.Binder.Format;
 
 namespace Chomp {
     // Token: 0x02000002 RID: 2
     public partial class Main : Form {
         // Token: 0x06000001 RID: 1 RVA: 0x00002048 File Offset: 0x00000248
         public Main() {
-            instance = this;
+            Instance = this;
             this.InitializeComponent();
             //this.MakeDarkTheme(settings.DarkTheme);
             this.GoToReferenceMenuStripItems = new[] {
@@ -41,7 +42,7 @@ namespace Chomp {
 
         // Token: 0x06000002 RID: 2 RVA: 0x00002158 File Offset: 0x00000358
         private void Main_Load(object sender, EventArgs e) {
-            this.Text = $"Yapped - Rune Bear Special Edition ({Assembly.GetExecutingAssembly().GetName().Version}, {RuntimeInformation.FrameworkDescription}{(!RuntimeFeature.IsDynamicCodeSupported ? " Native AOT" : "")})";
+            this.Text = $"Yapped - Rune Bear Special Edition ({Assembly.GetExecutingAssembly().GetName().Version}, {RuntimeInformation.FrameworkDescription})";
             this.toolTip_filterParams.SetToolTip(this.filter_Params.Control, this.filter_Params.ToolTipText);
             this.toolTip_filterRows.SetToolTip(this.filter_Rows.Control, this.filter_Rows.ToolTipText);
             this.toolTip_filterCells.SetToolTip(this.filter_Cells.Control, this.filter_Cells.ToolTipText);
@@ -304,21 +305,28 @@ namespace Chomp {
             if (!isSecondary) {
                 this.processLabel.Text = target_path;
             }
-            foreach (BinderFile file in result.ParamBND.Files.Where((BinderFile f) => f.Name.EndsWith(".param"))) {
-                string name = Path.GetFileNameWithoutExtension(file.Name);
-                try {
-                    PARAM param = SoulsFile<PARAM>.Read(file.Bytes);
-                    if (param.ApplyParamdefCarefully(this.paramdefs)) {
-                        result.ParamWrappers.Add(new ParamWrapper(name, param, param.AppliedParamdef));
-                    }
-                } catch (Exception ex2) {
-                    Utility.ShowError($"""
+            long timeInPARAMRead = 0;
+            long timeInApplyPARAMDEF = 0;
+            this.processLabel.Text += $" (cum in ass in {Globals.MeasureTimeSpent(() => {
+                foreach (BinderFile file in result.ParamBND.Files.Where((BinderFile f) => f.Name.EndsWith(".param"))) {
+                    string name = Path.GetFileNameWithoutExtension(file.Name);
+                    try {
+                        Unsafe.SkipInit(out PARAM param); // param init is guaranteed
+                        timeInPARAMRead += Globals.MeasureTimeSpent(() => param = SoulsFile<PARAM>.Read(file.Bytes), new Stopwatch { });
+                        timeInApplyPARAMDEF += Globals.MeasureTimeSpent(() => {
+                            if (param.ApplyParamdefCarefully(this.paramdefs)) {
+                                result.ParamWrappers.Add(new ParamWrapper(name, param, param.AppliedParamdef));
+                            }
+                        }, new Stopwatch { });
+                    } catch (Exception ex2) {
+                        Utility.ShowError($"""
                         Failed to load param file: {name}.param
 
                         {ex2}
                         """);
+                    }
                 }
-            }
+            }, new Stopwatch { })}ms, Read in {timeInPARAMRead}ms, Apply in {timeInApplyPARAMDEF}ms)";
             result.ParamWrappers.Sort();
             return result;
         }
@@ -500,7 +508,7 @@ namespace Chomp {
                         Extended = 4,
                         Unk04 = false,
                         Unk05 = false,
-                        Format = SoulsFormats.Binder.Binder.Format.Names1 | SoulsFormats.Binder.Binder.Format.LongOffsets | SoulsFormats.Binder.Binder.Format.Compression | SoulsFormats.Binder.Binder.Format.Flag6,
+                        Format = Format.Names1 | Format.LongOffsets | Format.Compression | Format.Flag6,
                         Unicode = true,
                         Files = this.regulation.Files.Where(f => f.Name.EndsWith(".param")).ToList()
                     }.Write($"{dir}\\gameparam.parambnd.dcx");
@@ -511,7 +519,7 @@ namespace Chomp {
                             Extended = 4,
                             Unk04 = false,
                             Unk05 = false,
-                            Format = SoulsFormats.Binder.Binder.Format.Names1 | SoulsFormats.Binder.Binder.Format.LongOffsets | SoulsFormats.Binder.Binder.Format.Compression | SoulsFormats.Binder.Binder.Format.Flag6,
+                            Format = Format.Names1 | Format.LongOffsets | Format.Compression | Format.Flag6,
                             Unicode = true,
                             Files = this.regulation.Files.Where(f => f.Name.EndsWith(".stayparam")).ToList()
                         }.Write($"{dir}\\stayparam.parambnd.dcx");
@@ -1061,11 +1069,8 @@ namespace Chomp {
         private void massImportDataMenuItem_Click(object sender, EventArgs e) => _ = this.InvalidationMode
                 || MessageBox.Show("Mass Import will import data from CSV files for all params. Continue?",
                     "Mass Import", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No
-                || this.primary_result == null || MessageBox.Show($"Mass data import complete in {Globals.MeasureTimeSpent(() => {
-                    foreach (ParamWrapper wrapper in this.primary_result.ParamWrappers) {
-                        this.ImportParamData(wrapper, true);
-                    }
-                }, new())} ms!", "Mass Import") <= DialogResult.None;
+                || this.primary_result == null || MessageBox.Show($"Mass data import complete in {Globals.MeasureTimeSpent(() =>
+                this.primary_result.ParamWrappers.ForEach(wrapper => this.ImportParamData(wrapper, true)), new())} ms!", "Mass Import") <= DialogResult.None;
 
         // Token: 0x0600002D RID: 45 RVA: 0x00005770 File Offset: 0x00003970
         private void massExportDataMenuItem_Click(object sender, EventArgs e) => _ = this.InvalidationMode ||
@@ -1094,12 +1099,7 @@ namespace Chomp {
                 string[] field_inclusions_list = settings.FieldExporter_FieldInclusion.Split(delimiter);
                 string[] field_exclusions_list = settings.FieldExporter_FieldExclusion.Split(delimiter);
                 string[] row_range_array = row_range.Split(delimiter);
-                try {
-                    if (row_range_array.Length != 2) {
-                        _ = MessageBox.Show("Row range invalid.", "Field Adjuster", MessageBoxButtons.OK);
-                        return;
-                    }
-                } catch {
+                if (row_range_array.Length != 2) {
                     _ = MessageBox.Show("Row range invalid.", "Field Adjuster", MessageBoxButtons.OK);
                     return;
                 }
@@ -1354,8 +1354,49 @@ namespace Chomp {
         }
 
         private const char NullCharacter = '\0';
-
+        public readonly struct PointerKeeper<T> {
+            private readonly nuint _value;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public unsafe PointerKeeper(T* p) => _value = AsManaged<nuint>(p);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public unsafe PointerKeeper(ref T p) => _value = (nuint)AsPointer(ref p);
+            public unsafe T Value {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => *(T*)this._value;
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => *(T*)this._value = value;
+            }
+            public unsafe T this[ulong index] {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ((T*)this._value)[index];
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => ((T*)this._value)[index] = value;
+            }
+            public unsafe T this[long index] {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ((T*)this._value)[index];
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => ((T*)this._value)[index] = value;
+            }
+            public unsafe T this[uint index] {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ((T*)this._value)[index];
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => ((T*)this._value)[index] = value;
+            }
+            public unsafe T this[int index] {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ((T*)this._value)[index];
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => ((T*)this._value)[index] = value;
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static unsafe implicit operator PointerKeeper<T>(T* reference) => new(reference);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static unsafe implicit operator T*(PointerKeeper<T> keeper) => (T*)keeper._value;
+        }
         // Token: 0x06000030 RID: 48 RVA: 0x0000661C File Offset: 0x0000481C
+        [SkipLocalsInit]
         private unsafe void ImportParamData(ParamWrapper wrapper, bool isSilent) {
             string paramName = wrapper.Name;
             string paramPath = $"{this.GetProjectDirectory("CSV")}\\{paramName}.csv";
@@ -1374,8 +1415,8 @@ namespace Chomp {
                     Access = FileAccess.Read,
                     BufferSize = 0x1000,
                     Mode = FileMode.Open,
-                    Options = FileOptions.SequentialScan
-                }), null, detectEncodingFromByteOrderMarks: true, 0x400);
+                    Options = FileOptions.RandomAccess
+                }), null, detectEncodingFromByteOrderMarks: true, 0x1000);
             } catch (Exception ex) {
                 Utility.ShowError($"""
                     Failed to open {paramPath}.
@@ -1387,29 +1428,28 @@ namespace Chomp {
             _ = reader.ReadLine();
             List<Row> rows = wrapper.Rows;
             Row[] rows_array = rows.AsContents();
-            ulong cells_length = ((ulong)(rows[0].Cells as Cell[]).Length << 3) + 16;
-            ulong rows_length = ((ulong)rows.Count << 3) + 16;
+            ulong cells_length = (ulong)(rows[0].Cells as Cell[]).Length + 2 << 3;
+            ulong rows_length = (ulong)rows.Count + 2 << 3;
             string export_delimeter = settings.ExportDelimiter;
             bool includeRowNameInCSV = settings.IncludeRowNameInCSV;
             ulong i = 16;
             int export_delimeter_length = export_delimeter.Length;
             PARAMDEF.Field[] fields = wrapper.AppliedParamDef.Fields.AsContents();
             int fields_count = wrapper.AppliedParamDef.Fields.GetLength();
-            int* cells_filtered = stackalloc int[fields_count];
+            ulong* cells_filtered = stackalloc ulong[fields_count];
             int cells_filtered_length = 0;
-            {
-                for (int index = 0; index < fields_count; index++) {
-                    if (fields[index].DisplayType != PARAMDEF.DefType.dummy8) {
-                        cells_filtered[cells_filtered_length++] = 16 + (index << 3);
-                    }
+            for (int index = 0; index < fields_count; index++) {
+                if (fields[index].DisplayType != PARAMDEF.DefType.dummy8) {
+                    cells_filtered[cells_filtered_length++] = 2 + (ulong)index << 3;
                 }
             }
-            fixed (char* export_delimeter_p = export_delimeter) {
-                while (!reader.EndOfStream) {
-                    string line = reader.ReadLine();
-                    var splitter = new IterativeStringSplitterSmartVectorized(line, export_delimeter_p, export_delimeter_length);
+            cells_filtered_length <<= 3;
+            while (!reader.EndOfStream) {
+                string line = reader.ReadLine();
+                fixed (char* p = line) {
+                    var splitter = new IterativeStringSplitterSmartVectorized(new ReadOnlySpan<char>(p, line.Length), export_delimeter);
                     int id = int.Parse(splitter.Next());
-                    Row newRow = null;
+                    Row newRow;
                     if (rows_length > i) {
                         newRow = rows_array.At(i);
                         newRow.ID = id;
@@ -1449,47 +1489,45 @@ namespace Chomp {
                     //         cell_index++;
                     //     }
                     // }
-                    {
-                        Cell[] cells = newRow.Cells.CastTo<IReadOnlyList<Cell>, Cell[]>();
-                        for (int j = 0; j < cells_filtered_length; j++) {
-                            Cell cell = cells.At(cells_filtered[j]);
-                            ReadOnlySpan<char> chars = splitter.Next();
-                            try {
-                                cell.SetValue(chars);
-                                // if (type == PARAMDEF.DefType.u8) {
-                                //     cell.Value = Convert.ToByte(values[cell_index], CultureInfo.InvariantCulture);
-                                // }
-                                // if (type == PARAMDEF.DefType.s16) {
-                                //     cell.Value = Convert.ToInt16(values[cell_index], CultureInfo.InvariantCulture);
-                                // }
-                                // if (type == PARAMDEF.DefType.u16) {
-                                //     cell.Value = Convert.ToUInt16(values[cell_index], CultureInfo.InvariantCulture);
-                                // }
-                                // if (type == PARAMDEF.DefType.s32) {
-                                //     cell.Value = Convert.ToInt32(values[cell_index], CultureInfo.InvariantCulture);
-                                // }
-                                // if (type == PARAMDEF.DefType.u32) {
-                                //     cell.Value = Convert.ToUInt32(values[cell_index], CultureInfo.InvariantCulture);
-                                // }
-                                // if (type == PARAMDEF.DefType.f32) {
-                                //     cell.Value = Convert.ToSingle(values[cell_index]);
-                                // }
-                                // if (type == PARAMDEF.DefType.fixstr || type == PARAMDEF.DefType.fixstrW) {
-                                //     cell.Value = Convert.ToString(values[cell_index]);
-                                // }
-                            } catch {
-                                _ = MessageBox.Show($"Row {newRow.ID}, Field {cell.Name} of {cell.Def.Def.ParamType}, {cell.Type} and {cell.EditorName} has invalid value \"{chars}\", skipped import of this value.", "Data Import");
-                            }
+                    Cell[] cells = newRow.Cells.CastTo<Cell[], IReadOnlyList<Cell>>();
+                    for (int j = 0; j < cells_filtered_length; j += 8) {
+                        Cell cell = cells.At(cells_filtered.At(j));
+                        ReadOnlySpan<char> chars = splitter.Next();
+                        try {
+                            cell.SetValue(chars);
+                            // if (type == PARAMDEF.DefType.u8) {
+                            //     cell.Value = Convert.ToByte(values[cell_index], CultureInfo.InvariantCulture);
+                            // }
+                            // if (type == PARAMDEF.DefType.s16) {
+                            //     cell.Value = Convert.ToInt16(values[cell_index], CultureInfo.InvariantCulture);
+                            // }
+                            // if (type == PARAMDEF.DefType.u16) {
+                            //     cell.Value = Convert.ToUInt16(values[cell_index], CultureInfo.InvariantCulture);
+                            // }
+                            // if (type == PARAMDEF.DefType.s32) {
+                            //     cell.Value = Convert.ToInt32(values[cell_index], CultureInfo.InvariantCulture);
+                            // }
+                            // if (type == PARAMDEF.DefType.u32) {
+                            //     cell.Value = Convert.ToUInt32(values[cell_index], CultureInfo.InvariantCulture);
+                            // }
+                            // if (type == PARAMDEF.DefType.f32) {
+                            //     cell.Value = Convert.ToSingle(values[cell_index]);
+                            // }
+                            // if (type == PARAMDEF.DefType.fixstr || type == PARAMDEF.DefType.fixstrW) {
+                            //     cell.Value = Convert.ToString(values[cell_index]);
+                            // }
+                        } catch {
+                            _ = MessageBox.Show($"Row {newRow.ID}, Field {cell.Name} of {cell.Def.Def.ParamType}, {cell.Type} and {cell.EditorName} has invalid value \"{chars}\", skipped import of this value.", "Data Import");
                         }
                     }
                 }
             }
             if (i <= rows_length) {
                 if (i < rows_length) {
-                    rows.SetLength((int)((i >> 3) - 16)); // Set List size;
+                    rows.SetLength((int)(i - 16 >> 3)); // Set List size;
                     // Clear references to remaining rows so they can be later reclaimed by GC
                     for (; i != rows_length; i += 8) {
-                        rows_array.AssignAnyAt<Row, ulong>(i, 0);
+                        rows_array.AssignAnyAt(i, 0UL);
                     }
                 }
             } else {
@@ -1500,6 +1538,68 @@ namespace Chomp {
                 _ = MessageBox.Show($"{paramName} data import complete!", "Data Import");
             }
         }
+        public static void RunSync(Func<Task> task) {
+            SynchronizationContext oldContext = SynchronizationContext.Current;
+            var synch = new ExclusiveSynchronizationContext();
+            SynchronizationContext.SetSynchronizationContext(synch);
+            synch.Post(async _ => {
+                try {
+                    await task();
+                } catch (Exception e) {
+                    synch.InnerException = e;
+                    throw;
+                } finally {
+                    synch.EndMessageLoop();
+                }
+            }, null);
+            synch.BeginMessageLoop();
+
+            SynchronizationContext.SetSynchronizationContext(oldContext);
+        }
+
+        private class ExclusiveSynchronizationContext : SynchronizationContext {
+            private bool done;
+            public Exception InnerException { get; set; }
+            private readonly AutoResetEvent workItemsWaiting = new(false);
+            private readonly Queue<ValueTuple<SendOrPostCallback, object>> items =
+                new();
+
+            public override void Send(SendOrPostCallback d, object state) => throw new NotSupportedException("We cannot send to our same thread");
+
+            public override void Post(SendOrPostCallback d, object state) {
+                lock (this.items) {
+                    this.items.Enqueue((d, state));
+                }
+                _ = this.workItemsWaiting.Set();
+            }
+
+            public void EndMessageLoop() => this.Post(_ => this.done = true, null);
+
+            public void BeginMessageLoop() {
+                while (!this.done) {
+                    Unsafe.SkipInit(out ValueTuple<SendOrPostCallback, object> task);
+                    bool done = false;
+                    lock (this.items) {
+                        if (this.items.Count > 0) {
+                            task = this.items.Dequeue();
+                            done = true;
+                        }
+                    }
+                    if (done) {
+                        task.Item1(task.Item2);
+                        if (this.InnerException != null) // the method threw an exeption
+                        {
+                            throw new AggregateException("AsyncHelpers.Run method threw an exception.", this.InnerException);
+                        }
+                    } else {
+                        _ = this.workItemsWaiting.WaitOne();
+                    }
+                }
+            }
+
+            public override SynchronizationContext CreateCopy() => this;
+        }
+
         // Token: 0x06000031 RID: 49 RVA: 0x00006AAC File Offset: 0x00004CAC
         private unsafe void ExportParamData(ParamWrapper wrapper, bool isSilent) {
             bool includeRowNameInCSV = settings.IncludeRowNameInCSV;
@@ -1513,53 +1613,60 @@ namespace Chomp {
             }
             _ = Directory.CreateDirectory(this.GetProjectDirectory("CSV"));
             {
-                using var output_file = new StreamWriter(paramPath, new FileStreamOptions {
-                    BufferSize = 0x1000,
+                using var out_file = new FileWriter(paramPath, new FileStreamOptions {
+                    BufferSize = 0,
                     Access = FileAccess.Write,
                     Mode = FileMode.Create,
-                    Options = FileOptions.Asynchronous | FileOptions.SequentialScan
-                });
+                    Options = FileOptions.SequentialScan
+                }, stackalloc char[0x1000]);
                 if (verboseCSVExport) {
-                    output_file.WriteLine("UNFURLED");
+                    out_file.WriteLine("UNFURLED");
                     foreach (Row row in wrapper.Rows) {
-                        Globals.WriteLine(output_file, row.ID.ToString(), exportDelimiter);
-                        Globals.WriteLine(output_file, "~#", row.Name, exportDelimiter);
-                        int cell_idx2 = 0;
-                        foreach (Cell cell2 in row.Cells) {
+                        out_file.Write(row.ID);
+                        out_file.WriteSmallString(export_delimeter_chars);
+                        out_file.WriteSmallString("~#");
+                        out_file.Write(row.Name);
+                        out_file.WriteSmallString(export_delimeter_chars);
+                        for (int i = 0; i < row.Cells.Count; i++) {
+                            Cell cell2 = row.Cells[i];
                             if (cell2.Def.DisplayType != PARAMDEF.DefType.dummy8) {
-                                if (row.Cells.Count == cell_idx2) {
-                                    Globals.WriteLine(output_file, "~#", cell2.Value.ToString());
+                                out_file.WriteSmallString("~#");
+                                if (row.Cells.Count == i) {
+                                    out_file.WriteLine(cell2);
                                 } else {
-                                    output_file.OPWrite("~#", cell2.Value.ToString(), exportDelimiter);
+                                    out_file.Write(cell2);
+                                    out_file.WriteSmallString(export_delimeter_chars);
                                 }
                             }
-                            cell_idx2++;
                         }
                     }
                 } else {
                     PARAMDEF.Field[] fields = wrapper.AppliedParamDef.Fields.AsContents();
                     int fields_count = wrapper.AppliedParamDef.Fields.GetLength();
+                    PARAMDEF.DefType* def_types_filtered = stackalloc PARAMDEF.DefType[fields_count];
                     int* cells_filtered = stackalloc int[fields_count];
                     int cells_filtered_length = 0;
                     for (int i = 0; i < fields_count; i++) {
                         if (fields[i].DisplayType != PARAMDEF.DefType.dummy8) {
-                            cells_filtered[cells_filtered_length++] = 16 + (i << 3);
+                            cells_filtered[cells_filtered_length] = 16 + (i << 3);
+                            def_types_filtered[cells_filtered_length++] = fields[i].DisplayType;
                         }
                     }
 
                     int cells_filtered_prelast_length = cells_filtered_length - 1;
                     if (cells_filtered_length != 0) {
                         if (settings.IncludeHeaderInCSV) {
+                            out_file.Write("Row ID");
+                            out_file.WriteSmallString(export_delimeter_chars);
                             if (includeRowNameInCSV) {
-                                output_file.OPWrite("Row ID", exportDelimiter, "Row Name", exportDelimiter);
-                            } else {
-                                output_file.OPWrite("Row ID", exportDelimiter);
+                                out_file.Write("Row Name");
+                                out_file.WriteSmallString(export_delimeter_chars);
                             }
                             for (int i = 0; i < cells_filtered_prelast_length; i++) {
-                                output_file.Write(fields.At(cells_filtered[i]).InternalName);
-                                output_file.Write(exportDelimiter);
+                                out_file.Write(fields.At(cells_filtered[i]).InternalName);
+                                out_file.WriteSmallString(export_delimeter_chars);
                             }
-                            output_file.WriteLine(fields.At(cells_filtered[cells_filtered_prelast_length]).InternalName);
+                            out_file.WriteLine(fields.At(cells_filtered[cells_filtered_prelast_length]).InternalName);
                         }
                         Row[] rows_array = rows.AsContents();
                         /*
@@ -1570,18 +1677,20 @@ namespace Chomp {
                          *     ...T* data; // offset: 16, end: length * sizeof(T) + 8
                          * }
                          */
-                        for (int j = 16, l = j + (rows.Count << 3); j != l; j += 8) {
+                        for (int j = 16, l = j + rows.Count * sizeof(nuint); j != l; j += sizeof(nuint)) {
                             Row row = rows_array.At(j);
-                            output_file.OPWrite(row.ID.ToString(), exportDelimiter);
+                            out_file.Write(row.ID);
+                            out_file.WriteSmallString(export_delimeter_chars);
                             if (includeRowNameInCSV) {
-                                output_file.OPWrite(row.Name, exportDelimiter);
+                                out_file.Write(row.Name);
+                                out_file.WriteSmallString(export_delimeter_chars);
                             }
-                            Cell[] cells = row.Cells.CastTo<IReadOnlyList<Cell>, Cell[]>();
+                            MiniCell[] cells = row.MiniCells;
                             for (int start = 0; start < cells_filtered_prelast_length; start++) {
-                                output_file.Write(cells.At(cells_filtered[start]).Value.ToString());
-                                output_file.Write(export_delimeter_chars);
+                                out_file.Write(def_types_filtered[start], cells.At(cells_filtered[start]));
+                                out_file.WriteSmallString(export_delimeter_chars);
                             }
-                            output_file.WriteLine(cells.At(cells_filtered[cells_filtered_prelast_length]).Value.ToString());
+                            out_file.WriteLine(def_types_filtered[cells_filtered_prelast_length], cells.At(cells_filtered[cells_filtered_prelast_length]));
                             // for (void** i2 = Pointers.ManagedToPointerArray(cells) + sizeof(ulong), end = i2 + *(ulong*)Pointers.ManagedToPointer(cells); i2 != end;) {
                             //     PARAM.Cell cell = Pointers.PointerToManaged<PARAM.Cell>(*i2);
                             //     if (cell.Def.DisplayType != PARAMDEF.DefType.dummy8) {
@@ -1777,18 +1886,18 @@ namespace Chomp {
             if (this.InvalidationMode) {
                 return;
             }
-            if (e.ColumnIndex != -1 && e.RowIndex != -1 && e.Button == MouseButtons.Right) {
-                DataGridViewCell c = (sender as DataGridView)[e.ColumnIndex, e.RowIndex];
+            if (e.ColumnIndex != -1 && e.RowIndex != -1 && e.Button == MouseButtons.Right && sender is DataGridView dgv) {
+                DataGridViewCell c = dgv[e.ColumnIndex, e.RowIndex];
                 if (!c.Selected) {
                     c.DataGridView.ClearSelection();
                     c.DataGridView.CurrentCell = c;
                     c.Selected = true;
                 }
-                DataGridViewCell currentCell = (sender as DataGridView).CurrentCell;
+                DataGridViewCell currentCell = dgv.CurrentCell;
                 if (currentCell != null) {
                     ContextMenuStrip cms = currentCell.ContextMenuStrip;
                     if (cms != null) {
-                        Rectangle r = currentCell.DataGridView.GetCellDisplayRectangle(currentCell.ColumnIndex, currentCell.RowIndex, false);
+                        Rectangle r = dgv.GetCellDisplayRectangle(currentCell.ColumnIndex, currentCell.RowIndex, false);
                         var p = new Point(r.X + r.Width, r.Y + r.Height);
                         cms.Show(currentCell.DataGridView, p);
                     }
@@ -2467,7 +2576,7 @@ namespace Chomp {
                     cell_row.Visible = false;
                     cell_row.Selected = false;
                     currencyManager.ResumeBinding();
-                    if (input_list.All([MethodImpl((MethodImplOptions)768)] (current_input) => current_input.Contains($"view{command_delimiter_string}")
+                    if (input_list.All([MethodImpl(MethodImplOptions.AggressiveInlining)] (current_input) => current_input.Contains($"view{command_delimiter_string}")
                         && BuildViewList("Views\\\\Field\\\\", current_input.Split(command_delimiter)[1].TrimStart(' ').ToLower())
                             .Any(view_name => cell_row_param_name.Contains(view_name) || cell_row_editor_name.Contains(view_name) || cell_row_value.Contains(view_name))
                         || current_input.Contains("exact" + command_delimiter_string)
@@ -2560,7 +2669,7 @@ namespace Chomp {
         // Token: 0x0600005F RID: 95 RVA: 0x0000AEE4 File Offset: 0x000090E4
         private void GenerateProjectDirectories(string project) {
             _ = (GameMode)this.toolStripComboBoxGame.SelectedItem;
-            string projectDir = $"Projects\\\\{settings.ProjectName}";
+            string projectDir = $"Projects\\\\{project}";
             bool flag = Directory.Exists(projectDir);
             string[] folders = new string[] {
                 "CSV",
@@ -2717,7 +2826,6 @@ namespace Chomp {
 
         // Token: 0x04000001 RID: 1
         public static readonly Settings settings = Settings.Default;
-        private static Main instance;
 
         // Token: 0x04000002 RID: 2
         private bool InvalidationMode;
@@ -2823,7 +2931,7 @@ namespace Chomp {
         // Token: 0x0400001D RID: 29
         private readonly string BEHAVIORPARAM_NPC = "BehaviorParam";
 
-        public static Main Instance { get => instance; set => instance = value; }
+        public static Main Instance { get; set; }
 
         // Token: 0x02000019 RID: 25
         public class LoadParamsResult {

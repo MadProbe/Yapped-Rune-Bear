@@ -358,6 +358,7 @@ namespace SoulsFormats.Formats.PARAM {
             _ => throw new NotImplementedException($"Default not implemented for type {field.DisplayType}"),
         };
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetBitLimit(DefType type) => bitLimits[(int)type];
             //type == DefType.u8
             //    ? 8

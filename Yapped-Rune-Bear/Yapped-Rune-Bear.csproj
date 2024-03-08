@@ -7,14 +7,18 @@
 		<AssemblyName>Yapped-Rune-Bear</AssemblyName>
 		<GenerateAssemblyInfo>False</GenerateAssemblyInfo>
 		<FileAlignment>512</FileAlignment>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>annotations</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWindowsForms>True</UseWindowsForms>
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
-		<PublishTrimmed>False</PublishTrimmed>
 		<PublishAot>True</PublishAot>
+		<PublishTrimmed>False</PublishTrimmed>
+		<SelfContained>True</SelfContained>
+		<PublishSingleFile>True</PublishSingleFile>
+		<LangVersion>preview</LangVersion>
+		<SuppressNETCoreSdkPreviewMessage>True</SuppressNETCoreSdkPreviewMessage>
 	</PropertyGroup>
 	<PropertyGroup>
 		<EnableDefaultItems>False</EnableDefaultItems>
@@ -22,7 +26,7 @@
 	<PropertyGroup>
 		<StartupObject>Program</StartupObject>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<EnablePreviewFeatures>True</EnablePreviewFeatures>
+		<EnablePreviewFeatures>true</EnablePreviewFeatures>
 		<SignAssembly>False</SignAssembly>
 		<IncludeSymbols>False</IncludeSymbols>
 		<ErrorReport>prompt</ErrorReport>
@@ -47,28 +51,12 @@
 		<Title>Yapped Rune Bear Special Edition</Title>
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>1701;1702;0649;0169;CA1050</NoWarn>
-		<DebugType>portable</DebugType>
-	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <NoWarn>1701;1702;0649;0169;CS9080;CA1050;CS9057;CS9084;NU1701</NoWarn>
 	  <DebugType>portable</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
-	  <DebugType>portable</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>1701;1702;0649;0169;CA1050</NoWarn>
-		<DebugType>portable</DebugType>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
-	  <DebugType>portable</DebugType>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <NoWarn>1701;1702;0649;0169;CA1050;NU1701</NoWarn>
+	  <NoWarn>1701;1702;0649;0169;CS9080;CA1050;CS9057;CS9084;NU1701</NoWarn>
 	  <DebugType>portable</DebugType>
 	</PropertyGroup>
 	<ItemGroup>
@@ -147,7 +135,11 @@
 		<Compile Include="Util/ParamWrapper.cs" />
 		<Compile Include="Util/StringToFormula.cs" />
 		<Compile Include="Util/Utility.cs" />
+		<Compile Include="Util\AssemblyAdditionalInfoAttribute.cs" />
+		<Compile Include="Util\fast-dtoa.cs" />
+		<Compile Include="Util\FileWriter.cs" />
 		<Compile Include="Util\Shenanigans.cs" />
+		<Compile Include="Util\StreamWriterExtensions.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="FodyWeavers.xml" />
@@ -207,17 +199,14 @@
 		<Using Include="Chomp" />
 		<Using Include="System.Configuration" />
 		<Using Include="System.Diagnostics" />
-		<Using Include="System.Enum">
-		  <Alias>Enum</Alias>
-		</Using>
+		<Using Include="System.Enum" Alias="Enum" />
+		<Using Include="System.Diagnostics.CodeAnalysis.SuppressMessageAttribute" Alias="SuppressMessageAttribute" />
 		<Using Include="System.Reflection" />
 		<Using Include="System.Runtime.CompilerServices" />
 		<Using Include="System.Runtime.InteropServices" />
 		<Using Include="System.Text" />
 		<Using Include="UnsafeCode" />
-		<Using Include="UnsafeCode.Pointers">
-			<Static>True</Static>
-		</Using>
+		<Using Include="UnsafeCode.Pointers" Static="True" />
 	</ItemGroup>
 	<ItemGroup>
 		<Folder Include="Additionals/**" />

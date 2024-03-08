@@ -78,10 +78,13 @@ namespace SoulsFormats.Binder.BND4 {
         /// </summary>
         protected internal override void Read(BinaryReaderEx br) {
             List<BinderFileHeader> fileHeaders = ReadHeader(this, br);
-            this.Files = new List<BinderFile>(fileHeaders.Count);
-            foreach (BinderFileHeader fileHeader in fileHeaders) {
-                this.Files.Add(fileHeader.ReadFileData(br));
+            int count = fileHeaders.Count;
+            this.Files = new List<BinderFile>(count);
+            BinderFile[] files = this.Files.AsContents();
+            for (int i = 0; i < count; i++) {
+                files[i] = fileHeaders[i].ReadFileData(br);
             }
+            this.Files.SetLength(count);
         }
 
         internal static List<BinderFileHeader> ReadHeader(IBND4 bnd, BinaryReaderEx br) {

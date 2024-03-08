@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -9,7 +10,7 @@ namespace SoulsFormats.Util {
     /// <summary>
     /// An extended writer for binary data supporting big and little endianness, value reservation, and arrays.
     /// </summary>
-    public class BinaryWriterEx {
+    public class BinaryWriterEx : IDisposable {
         private readonly BinaryWriter bw;
         private readonly Stack<long> steps;
         private readonly Dictionary<string, long> reservations;
@@ -17,12 +18,13 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Interpret values as big-endian if set, or little-endian if not.
         /// </summary>
-        public bool BigEndian { get; set; }
+        public bool BigEndian;
 
         /// <summary>
         /// Varints are written as Int64 if set, otherwise Int32.
         /// </summary>
-        public bool VarintLong { get; set; }
+        public bool VarintLong;
+        private bool disposedValue;
 
         /// <summary>
         /// Current size of varints in bytes.
@@ -32,13 +34,15 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// The underlying stream.
         /// </summary>
-        public Stream Stream { get; }
+        public readonly Stream Stream;
 
         /// <summary>
         /// The current position of the stream.
         /// </summary>
         public long Position {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => this.Stream.Position;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => this.Stream.Position = value;
         }
 
@@ -151,7 +155,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a one-byte boolean value.
         /// </summary>
-        public void WriteBoolean(bool value) => this.bw.Write(value);
+        public void WriteBoolean(bool value) => this.bw.WriteValueType(value);
 
         /// <summary>
         /// Writes an array of one-byte boolean values.
@@ -181,7 +185,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a one-byte signed integer.
         /// </summary>
-        public void WriteSByte(sbyte value) => this.bw.Write(value);
+        public void WriteSByte(sbyte value) => this.bw.WriteValueType(value);
 
         /// <summary>
         /// Writes an array of one-byte signed integers.
@@ -211,7 +215,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a one-byte unsigned integer.
         /// </summary>
-        public void WriteByte(byte value) => this.bw.Write(value);
+        public void WriteByte(byte value) => this.bw.WriteValueType(value);
 
         /// <summary>
         /// Writes an array of one-byte unsigned integers.
@@ -246,13 +250,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a two-byte signed integer.
         /// </summary>
-        public void WriteInt16(short value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteInt16(short value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of two-byte signed integers.
@@ -282,13 +280,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a two-byte unsigned integer.
         /// </summary>
-        public void WriteUInt16(ushort value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteUInt16(ushort value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of two-byte unsigned integers.
@@ -318,13 +310,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a four-byte signed integer.
         /// </summary>
-        public void WriteInt32(int value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteInt32(int value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of four-byte signed integers.
@@ -354,13 +340,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a four-byte unsigned integer.
         /// </summary>
-        public void WriteUInt32(uint value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteUInt32(uint value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of four-byte unsigned integers.
@@ -390,13 +370,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes an eight-byte signed integer.
         /// </summary>
-        public void WriteInt64(long value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteInt64(long value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of eight-byte signed integers.
@@ -426,13 +400,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes an eight-byte unsigned integer.
         /// </summary>
-        public void WriteUInt64(ulong value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteUInt64(ulong value) => this.bw.WriteValueType(this.BigEndian ? BinaryPrimitives.ReverseEndianness(value) : value);
 
         /// <summary>
         /// Writes an array of eight-byte unsigned integers.
@@ -514,13 +482,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes a four-byte floating point number.
         /// </summary>
-        public void WriteSingle(float value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteSingle(float value) => this.bw.WriteValueType(this.BigEndian ? CastTo<float, uint>(BinaryPrimitives.ReverseEndianness(CastTo<uint, float>(value))) : value);
 
         /// <summary>
         /// Writes an array of four-byte floating point numbers.
@@ -550,13 +512,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Writes an eight-byte floating point number.
         /// </summary>
-        public void WriteDouble(double value) {
-            if (this.BigEndian) {
-                this.WriteReversedBytes(BitConverter.GetBytes(value));
-            } else {
-                this.bw.Write(value);
-            }
-        }
+        public void WriteDouble(double value) => this.bw.WriteValueType(this.BigEndian ? CastTo<double, ulong>(BinaryPrimitives.ReverseEndianness(CastTo<ulong, double>(value))) : value);
 
         /// <summary>
         /// Writes an array of eight-byte floating point numbers.
@@ -687,40 +643,73 @@ namespace SoulsFormats.Util {
         /// Writes a 4-byte color in ARGB order.
         /// </summary>
         public void WriteARGB(Color color) {
-            this.bw.Write(color.A);
-            this.bw.Write(color.R);
-            this.bw.Write(color.G);
-            this.bw.Write(color.B);
+            this.bw.WriteValueType(color.A);
+            this.bw.WriteValueType(color.R);
+            this.bw.WriteValueType(color.G);
+            this.bw.WriteValueType(color.B);
         }
 
         /// <summary>
         /// Writes a 4-byte color in ABGR order.
         /// </summary>
         public void WriteABGR(Color color) {
-            this.bw.Write(color.A);
-            this.bw.Write(color.B);
-            this.bw.Write(color.G);
-            this.bw.Write(color.R);
+            this.bw.WriteValueType(color.A);
+            this.bw.WriteValueType(color.B);
+            this.bw.WriteValueType(color.G);
+            this.bw.WriteValueType(color.R);
         }
 
         /// <summary>
         /// Writes a 4-byte color in RGBA order.
         /// </summary>
         public void WriteRGBA(Color color) {
-            this.bw.Write(color.R);
-            this.bw.Write(color.G);
-            this.bw.Write(color.B);
-            this.bw.Write(color.A);
+            this.bw.WriteValueType(color.R);
+            this.bw.WriteValueType(color.G);
+            this.bw.WriteValueType(color.B);
+            this.bw.WriteValueType(color.A);
         }
 
         /// <summary>
         /// Writes a 4-byte color in BGRA order.
         /// </summary>
         public void WriteBGRA(Color color) {
-            this.bw.Write(color.B);
-            this.bw.Write(color.G);
-            this.bw.Write(color.R);
-            this.bw.Write(color.A);
+            this.bw.WriteValueType(color.B);
+            this.bw.WriteValueType(color.G);
+            this.bw.WriteValueType(color.R);
+            this.bw.WriteValueType(color.A);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected internal virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
+                    this.Finish();
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~BinaryWriterEx()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Dispose() {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using SoulsFormats.Util;
 
 namespace SoulsFormats.Formats {
@@ -38,10 +36,7 @@ namespace SoulsFormats.Formats {
         /// <summary>
         /// Decompress a DCX file from an array of bytes and return the detected DCX type.
         /// </summary>
-        public static byte[] Decompress(byte[] data, out Type type) {
-            var br = new BinaryReaderEx(true, data);
-            return Decompress(br, out type);
-        }
+        public static byte[] Decompress(byte[] data, out Type type) => Decompress(new BinaryReaderEx(true, data), out type);
 
         /// <summary>
         /// Decompress a DCX file from an array of bytes.
@@ -110,20 +105,20 @@ namespace SoulsFormats.Formats {
             br.Position = 0;
             if (type == Type.Zlib) {
                 return SFUtil.ReadZlib(br, (int)br.Length);
-            } else if (type == Type.DCP_EDGE) {
-                return DecompressDCPEDGE(br);
             } else {
-                return type == Type.DCP_DFLT
-                    ? DecompressDCPDFLT(br)
-                    : type == Type.DCX_EDGE
-                                    ? DecompressDCXEDGE(br)
-                                    : type is Type.DCX_DFLT_10000_24_9
-                                                                or Type.DCX_DFLT_10000_44_9
-                                                                or Type.DCX_DFLT_11000_44_8
-                                                                or Type.DCX_DFLT_11000_44_9
-                                                                or Type.DCX_DFLT_11000_44_9_15
-                                                    ? DecompressDCXDFLT(br, type)
-                                                    : type == Type.DCX_KRAK ? DecompressDCXKRAK(br) : throw new FormatException("Unknown DCX format.");
+                return type == Type.DCP_EDGE
+                    ? DecompressDCPEDGE(br)
+                    : type == Type.DCP_DFLT
+                                    ? DecompressDCPDFLT(br)
+                                    : type == Type.DCX_EDGE
+                                                    ? DecompressDCXEDGE(br)
+                                                    : type is Type.DCX_DFLT_10000_24_9
+                                                                                or Type.DCX_DFLT_10000_44_9
+                                                                                or Type.DCX_DFLT_11000_44_8
+                                                                                or Type.DCX_DFLT_11000_44_9
+                                                                                or Type.DCX_DFLT_11000_44_9_15
+                                                                    ? DecompressDCXDFLT(br, type)
+                                                                    : type == Type.DCX_KRAK ? DecompressDCXKRAK(br) : throw new FormatException("Unknown DCX format.");
             }
         }
 
@@ -249,7 +244,7 @@ namespace SoulsFormats.Formats {
                 throw new InvalidDataException("Unexpected EgdT size in EDGE DCX.");
             }
 
-            byte[] decompressed = new byte[uncompressedSize];
+            byte[] decompressed = GC.AllocateUninitializedArray<byte>(uncompressedSize);
             using (var dcmpStream = new MemoryStream(decompressed)) {
                 for (int i = 0; i < chunkCount; i++) {
                     _ = br.AssertInt32(0);
@@ -352,9 +347,8 @@ namespace SoulsFormats.Formats {
         /// </summary>
         public static void Compress(byte[] data, Type type, string path) {
             using FileStream stream = File.Create(path);
-            var bw = new BinaryWriterEx(true, stream);
+            using var bw = new BinaryWriterEx(true, stream);
             Compress(data, bw, type);
-            bw.Finish();
         }
         #endregion
 
@@ -403,8 +397,8 @@ namespace SoulsFormats.Formats {
         }
 
         private static void CompressDCXEDGE(byte[] data, BinaryWriterEx bw) {
-            int chunkCount = data.Length / 0x10000;
-            if (data.Length % 0x10000 > 0) {
+            int chunkCount = data.Length >> 16;
+            if ((data.Length & 0xffff) > 0) {
                 chunkCount++;
             }
 
@@ -437,7 +431,7 @@ namespace SoulsFormats.Formats {
             bw.WriteInt32(0x24);
             bw.WriteInt32(0x10);
             bw.WriteInt32(0x10000);
-            bw.WriteInt32(data.Length % 0x10000);
+            bw.WriteInt32(data.Length & 0xffff);
             bw.ReserveInt32("EGDTSize");
             bw.WriteInt32(chunkCount);
             bw.WriteInt32(0x100000);
@@ -455,10 +449,7 @@ namespace SoulsFormats.Formats {
 
             int compressedSize = 0;
             for (int i = 0; i < chunkCount; i++) {
-                int chunkSize = 0x10000;
-                if (i == chunkCount - 1) {
-                    chunkSize = data.Length % 0x10000;
-                }
+                int chunkSize = i == chunkCount - 1 ? (data.Length & 0xffff) : 0x10000;
 
                 byte[] chunk;
                 using (var cmpStream = new MemoryStream())

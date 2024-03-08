@@ -286,11 +286,10 @@ namespace SoulsFormats.Util {
             _ = br.AssertByte(0x01, 0x5E, 0x9C, 0xDA);
             byte[] compressed = br.ReadBytes(compressedSize - 2);
 
-            using var decompressedStream = new MemoryStream();
-            using (var compressedStream = new MemoryStream(compressed))
-            using (var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress, true)) {
-                deflateStream.CopyTo(decompressedStream);
-            }
+            using var decompressedStream = new MemoryStream(compressedSize * 2); // in most cases compression ratio is ~= 50%
+            using var compressedStream = new MemoryStream(compressed);
+            using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress, true);
+            deflateStream.CopyTo(decompressedStream);
             return decompressedStream.ToArray();
         }
 
@@ -428,10 +427,8 @@ namespace SoulsFormats.Util {
         /// Repacks and encrypts DS3's regulation BND4 to the specified path.
         /// </summary>
         public static void EncryptDS3Regulation(string path, BND4 bnd) {
-            byte[] bytes = bnd.Write();
-            bytes = EncryptByteArray(ds3RegulationKey, bytes);
             _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllBytes(path, bytes);
+            File.WriteAllBytes(path, EncryptByteArray(ds3RegulationKey, bnd.Write()));
         }
 
         private static readonly byte[] erRegulationKey = ParseHexString("99 BF FC 36 6A 6B C8 C6 F5 82 7D 09 36 02 D6 76 C4 28 92 A0 1C 20 7F B0 24 D3 AF 4E 49 3F EF 99");
@@ -439,34 +436,27 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Decrypts and unpacks ER's regulation BND4 from the specified path.
         /// </summary>
-        public static BND4 DecryptERRegulation(string path) {
-            byte[] bytes = File.ReadAllBytes(path);
-            bytes = DecryptByteArray(erRegulationKey, bytes);
-            return BND4.Read(bytes);
-        }
+        public static BND4 DecryptERRegulation(string path) => BND4.Read(DecryptByteArrayStreaming(erRegulationKey,
+            new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0x400, FileOptions.SequentialScan),
+                    (int)new FileInfo(path).Length));
 
         /// <summary>
         /// Repacks and encrypts ER's regulation BND4 to the specified path.
         /// </summary>
         public static void EncryptERRegulation(string path, BND4 bnd) {
             _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllBytes(path, EncryptByteArray(erRegulationKey, bnd.Write()));
+            EncryptByteArrayStreaming(erRegulationKey, bnd.Write(), path);
         }
         private const int IV_SIZE = 128 / 8; // basically 16
-        private const int SAFETY_PADDING = 0x100;
 
         private static byte[] EncryptByteArray(byte[] key, byte[] secret) {
             // Avoid extraneous allocations and copying
             byte[] bytes = GC.AllocateUninitializedArray<byte>(secret.Length + (0x10 - secret.Length & 0xf) + IV_SIZE);
-            using var ms = new MemoryStream(bytes, IV_SIZE, bytes.Length - IV_SIZE, true);
-            using var cryptor = Aes.Create();
-            cryptor.Mode = CipherMode.CBC;
-            cryptor.Padding = PaddingMode.PKCS7;
-            cryptor.KeySize = 256;
-            cryptor.BlockSize = 128;
+            using var ms = new MemoryStream(bytes, writable: true);
+            using Aes cryptor = CreateAES(CipherMode.CBC, PaddingMode.PKCS7, keySize: 256, blockSize: 128);
 
             byte[] iv = cryptor.IV;
-            iv.AsSpan().CopyTo(bytes.AsSpan(0, IV_SIZE));
+            ms.Write(iv, 0, IV_SIZE);
 
             using var cs = new CryptoStream(ms, cryptor.CreateEncryptor(key, iv), CryptoStreamMode.Write, true);
 
@@ -474,23 +464,65 @@ namespace SoulsFormats.Util {
             return bytes;
         }
 
+        private static void EncryptByteArrayStreaming(byte[] key, byte[] data, string path) {
+            using var fileStream = new FileStream(path, new FileStreamOptions {
+                Access = FileAccess.Write,
+                BufferSize = 0,
+                Options = FileOptions.SequentialScan,
+                Share = FileShare.None
+            });
+            using var ms = new MemoryStream(data);
+            using Aes cryptor = CreateAES(CipherMode.CBC, PaddingMode.PKCS7, keySize: 256, blockSize: 128);
+
+            byte[] iv = cryptor.IV;
+            fileStream.Write(iv);
+
+            using var cs = new CryptoStream(fileStream, cryptor.CreateEncryptor(key, iv), CryptoStreamMode.Write, true);
+            ms.CopyTo(cs, 0x80);
+        }
+
         private static byte[] DecryptByteArray(byte[] key, byte[] secret) {
-            const int IV_SIZE = 128 / 8;
             byte[] iv = GC.AllocateUninitializedArray<byte>(IV_SIZE);
 
             Buffer.BlockCopy(secret, 0, iv, 0, IV_SIZE);
 
-            using var ms = new MemoryStream(GC.AllocateUninitializedArray<byte>(secret.Length + SAFETY_PADDING), true);
-            using var cryptor = Aes.Create();
-            cryptor.Mode = CipherMode.CBC;
-            cryptor.Padding = PaddingMode.None;
-            cryptor.KeySize = 256;
-            cryptor.BlockSize = 128;
+            byte[] buffer = GC.AllocateUninitializedArray<byte>(secret.Length - IV_SIZE);
+            using var ms = new MemoryStream(buffer, writable: true);
+            using Aes cryptor = CreateAES(CipherMode.CBC, PaddingMode.None, keySize: 256, blockSize: 128);
+            using var cs = new CryptoStream(ms, cryptor.CreateDecryptor(key, iv), CryptoStreamMode.Write);
 
-            using (var cs = new CryptoStream(ms, cryptor.CreateDecryptor(key, iv), CryptoStreamMode.Write)) {
-                cs.Write(secret.AsSpan(IV_SIZE, secret.Length - IV_SIZE));
+            cs.Write(secret, IV_SIZE, secret.Length - IV_SIZE);
+            return buffer;
+        }
+
+        private static unsafe byte[] DecryptByteArrayStreaming(byte[] key, FileStream secret, int file_size) {
+            byte[] iv = GC.AllocateUninitializedArray<byte>(IV_SIZE);
+            _ = secret.Read(iv, 0, IV_SIZE);
+
+
+            byte[] buffer = GC.AllocateUninitializedArray<byte>(file_size - IV_SIZE);
+            using var ms = new MemoryStream(buffer, writable: true);
+            using Aes cryptor = CreateAES(CipherMode.CBC, PaddingMode.None, keySize: 256, blockSize: 128);
+            using var cs = new CryptoStream(ms, cryptor.CreateDecryptor(key, iv), CryptoStreamMode.Write);
+            const int BLOCK_SIZE = 128 / 16;
+            //byte* bytes = stackalloc byte[BLOCK_SIZE + 16]; // block size span
+            //((nint*)bytes)[0] = typeof(byte[]).TypeHandle.Value;
+            //((nint*)bytes)[1] = BLOCK_SIZE;
+            byte[] bytesArray = GC.AllocateUninitializedArray<byte>(BLOCK_SIZE);
+            int bytesWritten;
+            while ((bytesWritten = secret.Read(bytesArray)) != 0) {
+                cs.Write(bytesArray, offset: 0, bytesWritten);
             }
-            return ms.ToArray();
+            return buffer;
+        }
+
+        internal static Aes CreateAES(CipherMode cipherMode, PaddingMode paddingMode, int keySize, int blockSize) {
+            var aes = Aes.Create();
+            aes.Mode = cipherMode;
+            aes.Padding = paddingMode;
+            aes.KeySize = keySize;
+            aes.BlockSize = blockSize;
+            return aes;
         }
 
         [GeneratedRegex("^[^\0]+\0 *$")]

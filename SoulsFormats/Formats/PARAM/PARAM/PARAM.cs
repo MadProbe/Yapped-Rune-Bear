@@ -196,9 +196,8 @@ namespace SoulsFormats {
         public void ApplyParamdef(PARAMDEF paramdef) {
             this.AppliedParamdef = paramdef;
             Row[] rows = this.Rows.AsContents();
-            for (int i = 16, l = (this.Rows.Count << 3) + 16; i < l; i += 8) {
-                Row row = rows.At(i);
-                row.ReadCells(this.RowReader, this.AppliedParamdef);
+            for (int i = 16, l = this.Rows.Count * Unsafe.SizeOf<Row>() + 16; i < l; i += Unsafe.SizeOf<Row>()) {
+                rows.At(i).ReadCells(this.RowReader, paramdef);
             }
         }
 
@@ -249,42 +248,42 @@ namespace SoulsFormats {
             /// <summary>
             /// Unknown.
             /// </summary>
-            Flag01 = 0b0000_0001,
+            Flag01 = 0x1,
 
             /// <summary>
             /// Expanded header with 32-bit data offset.
             /// </summary>
-            IntDataOffset = 0b0000_0010,
+            IntDataOffset = 0x2,
 
             /// <summary>
             /// Expanded header with 64-bit data offset.
             /// </summary>
-            LongDataOffset = 0b0000_0100,
+            LongDataOffset = 0x4,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag08 = 0b0000_1000,
+            Flag08 = 0x8,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag10 = 0b0001_0000,
+            Flag10 = 0x10,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag20 = 0b0010_0000,
+            Flag20 = 0x20,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag40 = 0b0100_0000,
+            Flag40 = 0x40,
 
             /// <summary>
             /// Param type string is written separately instead of fixed-width in the header.
             /// </summary>
-            OffsetParamType = 0b1000_0000,
+            OffsetParamType = 0x80,
         }
 
         /// <summary>
@@ -300,42 +299,42 @@ namespace SoulsFormats {
             /// <summary>
             /// Row names are written as UTF-16.
             /// </summary>
-            UnicodeRowNames = 0b0000_0001,
+            UnicodeRowNames = 0x1,
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            Flag02 = 0b0000_0010,
+            Flag02 = 0x2,
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            Flag04 = 0b0000_0100,
+            Flag04 = 0x4,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag08 = 0b0000_1000,
+            Flag08 = 0x8,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag10 = 0b0001_0000,
+            Flag10 = 0x10,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag20 = 0b0010_0000,
+            Flag20 = 0x20,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag40 = 0b0100_0000,
+            Flag40 = 0x40,
 
             /// <summary>
             /// Unused?
             /// </summary>
-            Flag80 = 0b1000_0000,
+            Flag80 = 0x80,
         }
     }
 }

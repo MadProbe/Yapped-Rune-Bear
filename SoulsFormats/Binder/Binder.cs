@@ -1,5 +1,4 @@
-﻿using System;
-using SoulsFormats.Util;
+﻿using SoulsFormats.Util;
 
 namespace SoulsFormats.Binder {
     /// <summary>

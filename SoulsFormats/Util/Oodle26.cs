@@ -47,10 +47,10 @@ namespace SoulsFormats.Util {
             [MarshalAs(UnmanagedType.LPArray)]
             byte[] compBuf,
             OodleLZ_CompressionLevel level,
-            IntPtr pOptions,
-            IntPtr dictionaryBase,
-            IntPtr lrm,
-            IntPtr scratchMem,
+            nint pOptions,
+            nint dictionaryBase,
+            nint lrm,
+            nint scratchMem,
             long scratchSize
         );
 
@@ -63,11 +63,11 @@ namespace SoulsFormats.Util {
         /// <param name="lzLevel">= OodleLZ_CompressionLevel_Normal</param>
         [LibraryImport("oo2core_6_win64.dll"), SuppressGCTransition]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvStdcall) })]
-        private static partial IntPtr OodleLZ_CompressOptions_GetDefault(
+        private static partial nint OodleLZ_CompressOptions_GetDefault(
             OodleLZ_Compressor compressor,
             OodleLZ_CompressionLevel lzLevel);
 
-        private static IntPtr OodleLZ_CompressOptions_GetDefault()
+        private static nint OodleLZ_CompressOptions_GetDefault()
             => OodleLZ_CompressOptions_GetDefault(OodleLZ_Compressor.OodleLZ_Compressor_Invalid, OodleLZ_CompressionLevel.OodleLZ_CompressionLevel_Normal);
 
 
@@ -97,11 +97,11 @@ namespace SoulsFormats.Util {
             OodleLZ_FuzzSafe fuzzSafe,
             OodleLZ_CheckCRC checkCRC,
             OodleLZ_Verbosity verbosity,
-            IntPtr decBufBase,
+            nint decBufBase,
             long decBufSize,
-            IntPtr fpCallback,
-            IntPtr callbackUserData,
-            IntPtr decoderMemory,
+            nint fpCallback,
+            nint callbackUserData,
+            nint decoderMemory,
             long decoderMemorySize,
             OodleLZ_Decode_ThreadPhase threadPhase
         );

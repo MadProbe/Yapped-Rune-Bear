@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Chomp.Util;
 using static SoulsFormats.PARAM;
 
 namespace Chomp.Tools {
@@ -89,116 +90,116 @@ namespace Chomp.Tools {
             strip.ForeColor = foreColor;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void OPWrite(this StreamWriter stream, string text, string text2) {
-            stream.Write(text);
-            stream.Write(text2);
+        public static void WriteAllocfree(this StreamWriter stream, string text, string text2) {
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void OPWrite(this StreamWriter stream, string text, string text2, string text3) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
+        public static void WriteAllocfree(this StreamWriter stream, string text, string text2, string text3) {
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void OPWrite(this StreamWriter stream, string text, string text2, string text3, string text4) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
+        public static void WriteAllocfree(this StreamWriter stream, string text, string text2, string text3, string text4) {
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void OPWrite(this StreamWriter stream, string text, string text2, string text3, string text4, string text5) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void OPWrite(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.Write(text6);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteAllocfree(text6);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void OPWrite(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6, string text7) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.Write(text6);
-            stream.Write(text7);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteAllocfree(text6);
+            stream.WriteAllocfree(text7);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void OPWrite(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6, string text7, string text8) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.Write(text6);
-            stream.Write(text7);
-            stream.Write(text8);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteAllocfree(text6);
+            stream.WriteAllocfree(text7);
+            stream.WriteAllocfree(text8);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2) {
-            stream.Write(text);
-            stream.WriteLine(text2);
+            stream.WriteAllocfree(text);
+            stream.WriteLineAllocfree(text2);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.WriteLine(text3);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteLineAllocfree(text3);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3, string text4) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.WriteLine(text4);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteLineAllocfree(text4);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3, string text4, string text5) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.WriteLine(text5);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteLineAllocfree(text5);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.WriteLine(text6);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteLineAllocfree(text6);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6, string text7) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.Write(text6);
-            stream.WriteLine(text7);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteAllocfree(text6);
+            stream.WriteLineAllocfree(text7);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteLine(this StreamWriter stream, string text, string text2, string text3, string text4, string text5, string text6, string text7, string text8) {
-            stream.Write(text);
-            stream.Write(text2);
-            stream.Write(text3);
-            stream.Write(text4);
-            stream.Write(text5);
-            stream.Write(text6);
-            stream.Write(text7);
-            stream.WriteLine(text8);
+            stream.WriteAllocfree(text);
+            stream.WriteAllocfree(text2);
+            stream.WriteAllocfree(text3);
+            stream.WriteAllocfree(text4);
+            stream.WriteAllocfree(text5);
+            stream.WriteAllocfree(text6);
+            stream.WriteAllocfree(text7);
+            stream.WriteLineAllocfree(text8);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string[]? GetCellReferences(this Cell cell) => Main.refs_dict[cell.Def.Def.ParamType]?[cell.Def.InternalName];

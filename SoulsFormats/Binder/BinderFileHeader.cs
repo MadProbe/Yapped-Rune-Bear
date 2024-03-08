@@ -135,13 +135,10 @@ namespace SoulsFormats.Binder {
         }
 
         internal BinderFile ReadFileData(BinaryReaderEx br) {
-            byte[] bytes;
             DCX.Type compressionType = DCX.Type.Zlib;
+            byte[] bytes = br.GetBytes(this.DataOffset, (int)this.CompressedSize);
             if (IsCompressed(this.Flags)) {
-                bytes = br.GetBytes(this.DataOffset, (int)this.CompressedSize);
                 bytes = DCX.Decompress(bytes, out compressionType);
-            } else {
-                bytes = br.GetBytes(this.DataOffset, (int)this.CompressedSize);
             }
 
             return new BinderFile(this.Flags, this.ID, this.Name, bytes) {

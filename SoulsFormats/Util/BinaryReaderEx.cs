@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
+﻿using System.Drawing;
 using System.Numerics;
 using System.Text;
 
@@ -17,12 +13,12 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Interpret values as big-endian if set, or little-endian if not.
         /// </summary>
-        public bool BigEndian { get; set; }
+        public bool BigEndian;
 
         /// <summary>
         /// Varints are read as Int64 if set, otherwise Int32.
         /// </summary>
-        public bool VarintLong { get; set; }
+        public bool VarintLong;
 
         /// <summary>
         /// Current size of varints in bytes.
@@ -32,7 +28,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// The underlying stream.
         /// </summary>
-        public Stream Stream { get; }
+        public readonly Stream Stream;
 
         /// <summary>
         /// The current position of the stream.
@@ -153,10 +149,11 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a one-byte boolean value.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public bool ReadBoolean() {
+            byte b = this.br.ReadValueTypeEffectively<byte>();
             // BinaryReader.ReadBoolean accepts any non-zero value as true, which I don't want.
-            byte b = this.br.ReadByte();
-            return b != 0 && (b == 1 ? true : throw new InvalidDataException($"ReadBoolean encountered non-boolean value: 0x{b:X2}"));
+            return b > 1 ? throw new InvalidDataException($"ReadBoolean encountered non-boolean value: 0x{b:X2}") : CastTo<bool, byte>(b);
         }
 
         /// <summary>
@@ -191,7 +188,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a one-byte signed integer.
         /// </summary>
-        public sbyte ReadSByte() => this.br.ReadSByte();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public sbyte ReadSByte() => this.br.ReadValueTypeEffectively<sbyte>();
 
         /// <summary>
         /// Reads an array of one-byte signed integers.
@@ -225,16 +223,16 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a one-byte unsigned integer.
         /// </summary>
-        public byte ReadByte() => this.br.ReadByte();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public byte ReadByte() => this.br.ReadValueTypeEffectively<byte>();
 
         /// <summary>
         /// Reads an array of one-byte unsigned integers.
         /// </summary>
         public byte[] ReadBytes(int count) {
-            byte[] result = this.br.ReadBytes(count);
-            return result.Length != count
-                ? throw new EndOfStreamException("Remaining size of stream was smaller than requested number of bytes.")
-                : result;
+            byte[] res = GC.AllocateUninitializedArray<byte>(count);
+            this.br.ReadExactly(res);
+            return res;
         }
 
         /// <summary>
@@ -250,6 +248,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a one-byte unsigned integer from the specified offset without advancing the stream.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public byte GetByte(long offset) => this.GetValue(this.ReadByte, offset);
 
         /// <summary>
@@ -281,6 +280,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a two-byte signed integer.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public short ReadInt16() => this.BigEndian ? BitConverter.ToInt16(this.ReadReversedBytes(2), 0) : this.br.ReadInt16();
 
         /// <summary>
@@ -315,7 +315,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a two-byte unsigned integer.
         /// </summary>
-        public ushort ReadUInt16() => this.BigEndian ? BitConverter.ToUInt16(this.ReadReversedBytes(2), 0) : this.br.ReadUInt16();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public ushort ReadUInt16() => this.BigEndian ? BitConverter.ToUInt16(this.ReadReversedBytes(2), 0) : this.br.ReadValueTypeEffectively<ushort>();
 
         /// <summary>
         /// Reads an array of two-byte unsigned integers.
@@ -349,7 +350,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a four-byte signed integer.
         /// </summary>
-        public int ReadInt32() => this.BigEndian ? BitConverter.ToInt32(this.ReadReversedBytes(4), 0) : this.br.ReadInt32();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public int ReadInt32() => this.BigEndian ? BitConverter.ToInt32(this.ReadReversedBytes(4), 0) : this.br.ReadValueTypeEffectively<int>();
 
         /// <summary>
         /// Reads an array of four-byte signed integers.
@@ -383,7 +385,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a four-byte unsigned integer.
         /// </summary>
-        public uint ReadUInt32() => this.BigEndian ? BitConverter.ToUInt32(this.ReadReversedBytes(4), 0) : this.br.ReadUInt32();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public uint ReadUInt32() => this.BigEndian ? BitConverter.ToUInt32(this.ReadReversedBytes(4), 0) : this.br.ReadValueTypeEffectively<uint>();
 
         /// <summary>
         /// Reads an array of four-byte unsigned integers.
@@ -417,7 +420,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads an eight-byte signed integer.
         /// </summary>
-        public long ReadInt64() => this.BigEndian ? BitConverter.ToInt64(this.ReadReversedBytes(8), 0) : this.br.ReadInt64();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public long ReadInt64() => this.BigEndian ? BitConverter.ToInt64(this.ReadReversedBytes(8), 0) : this.br.ReadValueTypeEffectively<long>();
 
         /// <summary>
         /// Reads an array of eight-byte signed integers.
@@ -451,6 +455,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads an eight-byte unsigned integer.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public ulong ReadUInt64() => this.BigEndian ? BitConverter.ToUInt64(this.ReadReversedBytes(8), 0) : this.br.ReadUInt64();
 
         /// <summary>
@@ -485,6 +490,7 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads either a four or eight-byte signed integer depending on VarintLong.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public long ReadVarint() => this.VarintLong ? this.ReadInt64() : this.ReadInt32();
 
         /// <summary>
@@ -518,7 +524,8 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a four-byte floating point number.
         /// </summary>
-        public float ReadSingle() => this.BigEndian ? BitConverter.ToSingle(this.ReadReversedBytes(4), 0) : this.br.ReadSingle();
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public float ReadSingle() => this.BigEndian ? BitConverter.ToSingle(this.ReadReversedBytes(4), 0) : this.br.ReadValueTypeEffectively<float>();
 
         /// <summary>
         /// Reads an array of four-byte floating point numbers.
@@ -552,7 +559,9 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads an eight-byte floating point number.
         /// </summary>
-        public double ReadDouble() => this.BigEndian ? BitConverter.ToDouble(this.ReadReversedBytes(8), 0) : this.br.ReadDouble();
+        // avoid bloating call-sites
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public double ReadDouble() => this.BigEndian ? BitConverter.ToDouble(this.ReadReversedBytes(8), 0) : this.br.ReadValueTypeEffectively<double>();
 
         /// <summary>
         /// Reads an array of eight-byte floating point numbers.
@@ -583,25 +592,23 @@ namespace SoulsFormats.Util {
         #endregion
 
         #region Enum
-        private TEnum ReadEnum<TEnum, TValue>(Func<TValue> readValue, string valueFormat) {
+        private static TEnum ReadEnum<TEnum, TValue>(Func<TValue> readValue) where TEnum : struct, Enum where TValue : struct {
             TValue value = readValue();
-            if (!Enum.IsDefined(typeof(TEnum), value)) {
-                string strValue = string.Format(valueFormat, value);
-                throw new InvalidDataException($"Read Byte not present in enum: {strValue}");
-            }
-            return (TEnum)(object)value;
+            return Enum.IsDefined(CastTo<TEnum, TValue>(value))
+                ? CastTo<TEnum, TValue>(value)
+                : throw new InvalidDataException($"Read {typeof(TValue).Name} not present in enum: 0x{value:X}");
         }
 
         /// <summary>
         /// Reads a one-byte value as the specified enum, throwing an exception if not present.
         /// </summary>
-        public TEnum ReadEnum8<TEnum>() where TEnum : Enum => this.ReadEnum<TEnum, byte>(this.ReadByte, "0x{0:X}");
+        public TEnum ReadEnum8<TEnum>() where TEnum : struct, Enum => ReadEnum<TEnum, byte>(this.ReadByte);
 
 
         /// <summary>
         /// Reads a one-byte enum from the specified position without advancing the stream.
         /// </summary>
-        public TEnum GetEnum8<TEnum>(long position) where TEnum : Enum {
+        public TEnum GetEnum8<TEnum>(long position) where TEnum : struct, Enum {
             this.StepIn(position);
             TEnum result = this.ReadEnum8<TEnum>();
             this.StepOut();
@@ -611,12 +618,12 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a two-byte value as the specified enum, throwing an exception if not present.
         /// </summary>
-        public TEnum ReadEnum16<TEnum>() where TEnum : Enum => this.ReadEnum<TEnum, ushort>(this.ReadUInt16, "0x{0:X}");
+        public TEnum ReadEnum16<TEnum>() where TEnum : struct, Enum => ReadEnum<TEnum, ushort>(this.ReadUInt16);
 
         /// <summary>
         /// Reads a two-byte enum from the specified position without advancing the stream.
         /// </summary>
-        public TEnum GetEnum16<TEnum>(long position) where TEnum : Enum {
+        public TEnum GetEnum16<TEnum>(long position) where TEnum : struct, Enum {
             this.StepIn(position);
             TEnum result = this.ReadEnum16<TEnum>();
             this.StepOut();
@@ -626,12 +633,12 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a four-byte value as the specified enum, throwing an exception if not present.
         /// </summary>
-        public TEnum ReadEnum32<TEnum>() where TEnum : Enum => this.ReadEnum<TEnum, uint>(this.ReadUInt32, "0x{0:X}");
+        public TEnum ReadEnum32<TEnum>() where TEnum : struct, Enum => ReadEnum<TEnum, uint>(this.ReadUInt32);
 
         /// <summary>
         /// Reads a four-byte enum from the specified position without advancing the stream.
         /// </summary>
-        public TEnum GetEnum32<TEnum>(long position) where TEnum : Enum {
+        public TEnum GetEnum32<TEnum>(long position) where TEnum : struct, Enum {
             this.StepIn(position);
             TEnum result = this.ReadEnum32<TEnum>();
             this.StepOut();
@@ -641,12 +648,12 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads an eight-byte value as the specified enum, throwing an exception if not present.
         /// </summary>
-        public TEnum ReadEnum64<TEnum>() where TEnum : Enum => this.ReadEnum<TEnum, ulong>(this.ReadUInt64, "0x{0:X}");
+        public TEnum ReadEnum64<TEnum>() where TEnum : struct, Enum => ReadEnum<TEnum, ulong>(this.ReadUInt64);
 
         /// <summary>
         /// Reads an eight-byte enum from the specified position without advancing the stream.
         /// </summary>
-        public TEnum GetEnum64<TEnum>(long position) where TEnum : Enum {
+        public TEnum GetEnum64<TEnum>(long position) where TEnum : struct, Enum {
             this.StepIn(position);
             TEnum result = this.ReadEnum64<TEnum>();
             this.StepOut();
@@ -774,33 +781,30 @@ namespace SoulsFormats.Util {
         /// <summary>
         /// Reads a null-terminated Shift JIS string in a fixed-size field.
         /// </summary>
-        public string ReadFixStr(int size) {
-            byte[] bytes = this.ReadBytes(size);
-            int terminator;
-            for (terminator = 0; terminator < size; terminator++) {
-                if (bytes[terminator] == 0) {
-                    break;
-                }
+        public unsafe string ReadFixStr(int size) {
+            byte* bytes = stackalloc byte[size];
+            int length = BytePointerIndexOfSingle(bytes, this.br.Read(new Span<byte>(bytes, size)), 0);
+            if (length < 0) {
+                length = size;
             }
-            return SFEncoding.ShiftJIS.GetString(bytes, 0, terminator);
+            return SFEncoding.ShiftJIS.GetString(bytes, length);
         }
 
         /// <summary>
         /// Reads a null-terminated UTF-16 string in a fixed-size field.
         /// </summary>
-        public string ReadFixStrW(int size) {
-            byte[] bytes = this.ReadBytes(size);
-            int terminator;
-            for (terminator = 0; terminator < size; terminator += 2) {
-                // If length is odd (which it really shouldn't be), avoid indexing out of the array and align the terminator to the end
-                if (terminator == size - 1) {
-                    terminator--;
-                } else if (bytes[terminator] == 0 && bytes[terminator + 1] == 0) {
-                    break;
-                }
+        public unsafe string ReadFixStrW(int size) {
+            byte* bytes = stackalloc byte[size];
+            size = this.br.Read(new Span<byte>(bytes, size));
+            if ((size & 1) != 0) { // Really, UTF16 strings which have odd length?
+                throw new InvalidDataException("Cannot read fixed-length wide string with odd length");
+            }
+            int length = CharPointerIndexOfSingle((char*)bytes, size >> 1, '\0');
+            if (length < 0) {
+                length = size;
             }
 
-            return this.BigEndian ? SFEncoding.UTF16BE.GetString(bytes, 0, terminator) : SFEncoding.UTF16.GetString(bytes, 0, terminator);
+            return this.BigEndian ? SFEncoding.UTF16BE.GetString(bytes, length) : SFEncoding.UTF16.GetString(bytes, length);
         }
         #endregion
 
@@ -839,11 +843,11 @@ namespace SoulsFormats.Util {
         /// Read length number of bytes and assert that they all match the given value.
         /// </summary>
         public void AssertPattern(int length, byte pattern) {
-            byte[] bytes = this.ReadBytes(length);
-            for (int i = 0; i < length; i++) {
-                if (bytes[i] != pattern) {
-                    throw new InvalidDataException($"Expected {length} 0x{pattern:X2}, got {bytes[i]:X2} at position {i}");
-                }
+            Span<byte> bytes = stackalloc byte[length];
+            this.br.Read(bytes);
+            int index = bytes.IndexOfAnyExcept(pattern);
+            if (index >= 0) {
+                throw new InvalidDataException($"Expected {length} 0x{pattern:X2}, got {bytes[index]:X2} at position {index}");
             }
         }
 

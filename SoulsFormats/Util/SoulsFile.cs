@@ -171,9 +171,8 @@ namespace SoulsFormats.Util {
 
             _ = Directory.CreateDirectory(Path.GetDirectoryName(path));
             using FileStream stream = File.Create(path);
-            var bw = new BinaryWriterEx(false, stream);
+            using var bw = new BinaryWriterEx(false, stream);
             this.Write(bw, compression);
-            bw.Finish();
         }
     }
 }

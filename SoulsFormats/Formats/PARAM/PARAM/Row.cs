@@ -1,8 +1,9 @@
-﻿using System.Runtime.InteropServices;
-using SoulsFormats.Formats.PARAM;
+﻿using SoulsFormats.Formats.PARAM;
 using SoulsFormats.Util;
+using DefType = SoulsFormats.PARAMDEF.DefType;
 
 namespace SoulsFormats {
+    [SkipLocalsInit]
     public partial class PARAM {
         /// <summary>
         /// One row in a param file.
@@ -38,6 +39,11 @@ namespace SoulsFormats {
                 private set;
             }
 
+            /// <summary>
+            /// Cells contained in this row. Must be loaded with PARAM.ApplyParamdef() before use.
+            /// </summary>
+            public MiniCell[] MiniCells;
+
             internal long DataOffset;
 
             /// <summary>
@@ -51,13 +57,13 @@ namespace SoulsFormats {
                 int count = paramdef.Fields.Count;
                 var cells = new Cell[count];
                 this.Cells = cells;
-                for (int i = 16, l = (count << 3) + 16; i < l; i += 8) {
+                for (int i = 16, l = count * Unsafe.SizeOf<Cell>() + 16; i < l; i += Unsafe.SizeOf<Cell>()) {
                     PARAMDEF.Field field = fields.At(i);
                     cells.AssignAt(i, new Cell(field, ParamUtil.ConvertDefaultValue(field)));
                 }
             }
 
-            internal Row(BinaryReaderEx br, PARAM parent, ref long actualStringsOffset) {
+            internal Row(BinaryReaderEx br, PARAM parent, scoped ref long actualStringsOffset) {
                 long nameOffset;
                 this.ID = br.ReadInt32();
                 if (parent.Format2D.HasFlag(FormatFlags1.LongDataOffset)) {
@@ -87,93 +93,89 @@ namespace SoulsFormats {
                 br.Position = this.DataOffset;
                 List<PARAMDEF.Field> fields = paramdef.Fields;
                 PARAMDEF.Field[] fields_array = fields.AsContents();
-                int start = 16, count = fields.Count, end = 16 + (count << 3);
+                int start = 16, count = fields.Count, end = 2 + count << 3;
                 var cells = new Cell[count];
+                MiniCell[] miniCells = this.MiniCells = new MiniCell[count];
 
                 int bitOffset = -1;
-                PARAMDEF.DefType bitType = PARAMDEF.DefType.u8;
+                DefType bitType = DefType.u8;
                 ulong bitValue = 0; // This is ulong so checkOrphanedBits doesn't fail on offsets of 32
-                //const int BIT_VALUE_SIZE = 64;
-
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                void checkOrphanedBits() {
-                    if (bitOffset != -1 && bitValue >> bitOffset != 0) {
-                        throw new InvalidDataException($"Invalid paramdef {paramdef.ParamType}; bits would be lost before +0x{br.Position - this.DataOffset:X} in row {this.ID}.");
-                    }
-                }
 
 
                 for (; start < end; start += 8) {
                     PARAMDEF.Field field = fields_array.At(start);
                     object value = null;
-                    PARAMDEF.DefType type = field.DisplayType;
+                    DefType type = field.DisplayType;
 
                     switch (type) {
-                        case PARAMDEF.DefType.s8:
-                            value = br.ReadSByte();
+                        case DefType.s8:
+                            value = miniCells[start >> 3].SByteValue = br.ReadSByte();
                             break;
-                        case PARAMDEF.DefType.s16:
-                            value = br.ReadInt16();
+                        case DefType.s16:
+                            value = miniCells[start >> 3].ShortValue = br.ReadInt16();
                             break;
-                        case PARAMDEF.DefType.s32 or PARAMDEF.DefType.b32:
-                            value = br.ReadInt32();
+                        case DefType.s32 or DefType.b32:
+                            value = miniCells[start >> 3].IntValue = br.ReadInt32();
                             break;
-                        case PARAMDEF.DefType.f32 or PARAMDEF.DefType.angle32:
-                            value = br.ReadSingle();
+                        case DefType.f32 or DefType.angle32:
+                            value = miniCells[start >> 3].FloatValue = br.ReadSingle();
                             break;
-                        case PARAMDEF.DefType.f64:
-                            value = br.ReadDouble();
+                        case DefType.f64:
+                            value = miniCells[start >> 3].DoubleValue = br.ReadDouble();
                             break;
-                        case PARAMDEF.DefType.fixstr:
-                            value = br.ReadFixStr(field.ArrayLength);
+                        case DefType.fixstr:
+                            value = miniCells[start >> 3].StringValue = br.ReadFixStr(field.ArrayLength);
                             break;
-                        case PARAMDEF.DefType.fixstrW:
-                            value = br.ReadFixStrW(field.ArrayLength << 1); // * 2
+                        case DefType.fixstrW:
+                            value = miniCells[start >> 3].StringValue = br.ReadFixStrW(field.ArrayLength * 2);
                             break;
                         default:
                             if (ParamUtil.IsBitType(type)) {
                                 if (field.BitSize == -1) {
-                                    if (type == PARAMDEF.DefType.u8) {
-                                        value = br.ReadByte();
-                                    } else if (type == PARAMDEF.DefType.u16) {
-                                        value = br.ReadUInt16();
-                                    } else if (type == PARAMDEF.DefType.u32) {
-                                        value = br.ReadUInt32();
-                                    } else if (type == PARAMDEF.DefType.dummy8) {
-                                        value = br.ReadBytes(field.ArrayLength);
+                                    if (type == DefType.u8) {
+                                        value = miniCells[start >> 3].ByteValue = br.ReadByte();
+                                    } else if (type == DefType.u16) {
+                                        value = miniCells[start >> 3].UShortValue = br.ReadUInt16();
+                                    } else if (type == DefType.u32) {
+                                        value = miniCells[start >> 3].UIntValue = br.ReadUInt32();
+                                    } else if (type == DefType.dummy8) {
+                                        value = miniCells[start >> 3].ByteArrayValue = br.ReadBytes(field.ArrayLength);
                                     }
                                 }
+                                break;
                             } else {
                                 throw new NotImplementedException($"Unsupported field type: {type}");
                             }
-
-                            break;
                     }
 
                     if (value != null) {
-                        checkOrphanedBits();
+#if !CARELESS
+                        this.checkOrphanedBits(br, paramdef, bitOffset, bitValue);
+#endif
                         bitOffset = -1;
                     } else {
-                        PARAMDEF.DefType newBitType = type == PARAMDEF.DefType.dummy8 ? PARAMDEF.DefType.u8 : type;
+                        DefType newBitType = defTypesChange[(int)type];
                         int bitLimit = ParamUtil.GetBitLimit(newBitType);
 
-                        if (field.BitSize == 0) {
-                            throw new NotImplementedException($"Bit size 0 is not supported.");
-                        }
+                        //if (field.BitSize == 0) {
+                        //    throw new NotImplementedException($"Bit size 0 is not supported.");
+                        //}
 
-                        if (field.BitSize > bitLimit) {
-                            throw new InvalidDataException($"Bit size {field.BitSize} is too large to fit in type {newBitType}.");
-                        }
+                        //if (field.BitSize > bitLimit) {
+                        //    throw new InvalidDataException($"Bit size {field.BitSize} is too large to fit in type {newBitType}.");
+                        //}
 
                         if (bitOffset == -1 || newBitType != bitType || bitOffset + field.BitSize > bitLimit) {
-                            checkOrphanedBits();
+#if !CARELESS
+                            this.checkOrphanedBits(br, paramdef, bitOffset, bitValue);
+#endif
                             bitOffset = 0;
                             bitType = newBitType;
-                            if (bitType == PARAMDEF.DefType.u8) {
+                            if (bitType == DefType.u8) {
                                 bitValue = br.ReadByte();
-                            } else if (bitType == PARAMDEF.DefType.u16) {
+                            } else if (bitType == DefType.u16) {
                                 bitValue = br.ReadUInt16();
-                            } else if (bitType == PARAMDEF.DefType.u32) {
+                            } else if (bitType == DefType.u32) {
                                 bitValue = br.ReadUInt32();
                             }
                         }
@@ -181,19 +183,43 @@ namespace SoulsFormats {
                         //_ = bitValue << (BIT_VALUE_SIZE - field.BitSize - bitOffset) >> (BIT_VALUE_SIZE - field.BitSize);
                         ulong shifted = System.Runtime.Intrinsics.X86.Bmi1.X64.BitFieldExtract(bitValue, (byte)bitOffset, (byte)field.BitSize);
                         bitOffset += field.BitSize;
-                        if (bitType == PARAMDEF.DefType.u8) {
-                            value = (byte)shifted;
-                        } else if (bitType == PARAMDEF.DefType.u16) {
-                            value = (ushort)shifted;
-                        } else if (bitType == PARAMDEF.DefType.u32) {
-                            value = (uint)shifted;
+                        if (bitType == DefType.u8) {
+                            value = miniCells[start >> 3].ByteValue = (byte)shifted;
+                        } else if (bitType == DefType.u16) {
+                            value = miniCells[start >> 3].UShortValue = (ushort)shifted;
+                        } else if (bitType == DefType.u32) {
+                            value = miniCells[start >> 3].UIntValue = (uint)shifted;
                         }
                     }
 
-                    cells.AssignAnyAt(start, new Cell(field, value));
+                    cells.AssignAt(start, new Cell(field, value));
                 }
-                checkOrphanedBits();
+#if !CARELESS
+                this.checkOrphanedBits(br, paramdef, bitOffset, bitValue);
+#endif
                 this.Cells = cells;
+            }
+            private static readonly DefType[] defTypesChange = new DefType[] {
+                DefType.s8,
+                DefType.u8,
+                DefType.s16,
+                DefType.u16,
+                DefType.s32,
+                DefType.u32,
+                DefType.b32,
+                DefType.f32,
+                DefType.angle32,
+                DefType.f64,
+                DefType.u8,
+                DefType.fixstr,
+                DefType.fixstrW
+            };
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void checkOrphanedBits(BinaryReaderEx br, PARAMDEF paramdef, int bitOffset, ulong bitValue) {
+                if (bitOffset != -1 && bitValue >> bitOffset != 0) {
+                    throw new InvalidDataException($"Invalid paramdef {paramdef.ParamType}; bits would be lost before +0x{br.Position - this.DataOffset:X} in row {this.ID}.");
+                }
             }
 
             internal void WriteHeader(BinaryWriterEx bw, PARAM parent, int i) {
@@ -217,102 +243,89 @@ namespace SoulsFormats {
                 }
 
                 int bitOffset = -1;
-                PARAMDEF.DefType bitType = PARAMDEF.DefType.u8;
+                DefType bitType = DefType.u8;
                 ulong bitValue = 0;
                 const int BIT_VALUE_SIZE = 64;
-                Cell[] cells = this.Cells.CastTo<IReadOnlyList<Cell>, Cell[]>();
+                Cell[] cells = this.Cells.CastTo<Cell[], IReadOnlyList<Cell>>();
 
                 for (int i = 16, l_pre = (cells.Length << 3) + 8, l = l_pre + 8; i < l; i += 8) {
                     Cell cell = cells.At(i);
                     object value = cell.Value;
                     PARAMDEF.Field field = cell.Def;
-                    PARAMDEF.DefType type = field.DisplayType;
+                    DefType type = field.DisplayType;
 
                     switch (type) {
-                        case PARAMDEF.DefType.s8:
+                        case DefType.s8:
                             bw.WriteSByte((sbyte)value);
                             break;
-                        case PARAMDEF.DefType.s16:
+                        case DefType.s16:
                             bw.WriteInt16((short)value);
                             break;
-                        case PARAMDEF.DefType.s32 or PARAMDEF.DefType.b32:
+                        case DefType.s32 or DefType.b32:
                             bw.WriteInt32((int)value);
                             break;
-                        case PARAMDEF.DefType.f32 or PARAMDEF.DefType.angle32:
+                        case DefType.f32 or DefType.angle32:
                             bw.WriteSingle((float)value);
                             break;
-                        case PARAMDEF.DefType.f64:
+                        case DefType.f64:
                             bw.WriteDouble((double)value);
                             break;
-                        case PARAMDEF.DefType.fixstr:
+                        case DefType.fixstr:
                             bw.WriteFixStr((string)value, field.ArrayLength);
                             break;
-                        case PARAMDEF.DefType.fixstrW:
-                            bw.WriteFixStrW((string)value, field.ArrayLength << 1); // * 2
+                        case DefType.fixstrW:
+                            bw.WriteFixStrW((string)value, field.ArrayLength * 2);
                             break;
-                        default:
-                            if (ParamUtil.IsBitType(type)) {
-                                if (field.BitSize == -1) {
-                                    if (type == PARAMDEF.DefType.u8) {
-                                        bw.WriteByte((byte)value);
-                                    } else if (type == PARAMDEF.DefType.u16) {
-                                        bw.WriteUInt16((ushort)value);
-                                    } else if (type == PARAMDEF.DefType.u32) {
-                                        bw.WriteUInt32((uint)value);
-                                    } else if (type == PARAMDEF.DefType.dummy8) {
-                                        bw.WriteBytes((byte[])value);
-                                    }
-                                } else {
-                                    if (bitOffset == -1) {
-                                        bitOffset = 0;
-                                        bitType = type == PARAMDEF.DefType.dummy8 ? PARAMDEF.DefType.u8 : type;
-                                        bitValue = 0;
-                                    }
-
-                                    uint shifted = 0;
-                                    if (bitType == PARAMDEF.DefType.u8) {
-                                        shifted = (byte)value;
-                                    } else if (bitType == PARAMDEF.DefType.u16) {
-                                        shifted = (ushort)value;
-                                    } else if (bitType == PARAMDEF.DefType.u32) {
-                                        shifted = (uint)value;
-                                    }
-                                    // Shift left first to clear any out-of-range bits
-                                    shifted = shifted << (BIT_VALUE_SIZE - field.BitSize) >> (BIT_VALUE_SIZE - field.BitSize - bitOffset);
-                                    bitValue |= shifted;
-                                    bitOffset += field.BitSize;
-
-                                    bool write = false;
-                                    if (i == l_pre) {
-                                        write = true;
-                                    } else {
-                                        PARAMDEF.Field nextField = cells.At(i + 8).Def;
-                                        PARAMDEF.DefType nextType = nextField.DisplayType;
-                                        int bitLimit = ParamUtil.GetBitLimit(bitType);
-                                        if (!ParamUtil.IsBitType(nextType) || nextField.BitSize == -1 || bitOffset + nextField.BitSize > bitLimit
-                                            || (nextType == PARAMDEF.DefType.dummy8 ? PARAMDEF.DefType.u8 : nextType) != bitType) {
-                                            write = true;
-                                        }
-                                    }
-
-                                    if (write) {
-                                        bitOffset = -1;
-                                        if (bitType == PARAMDEF.DefType.u8) {
-                                            bw.WriteByte((byte)bitValue);
-                                        } else if (bitType == PARAMDEF.DefType.u16) {
-                                            bw.WriteUInt16((ushort)bitValue);
-                                        } else if (bitType == PARAMDEF.DefType.u32) {
-                                            bw.WriteUInt32((uint)bitValue);
-                                        }
-                                    }
+                        case DefType.u8 or DefType.u16 or DefType.u32 or DefType.dummy8:
+                            if (field.BitSize == -1) {
+                                if (type == DefType.u8) {
+                                    bw.WriteByte((byte)value);
+                                } else if (type == DefType.u16) {
+                                    bw.WriteUInt16((ushort)value);
+                                } else if (type == DefType.u32) {
+                                    bw.WriteUInt32((uint)value);
+                                } else if (type == DefType.dummy8) {
+                                    bw.WriteBytes((byte[])value);
                                 }
                             } else {
-                                throw new NotImplementedException($"Unsupported field type: {type}");
-                            }
+                                if (bitOffset == -1) {
+                                    bitOffset = 0;
+                                    bitType = defTypesChange[(int)type];
+                                    bitValue = 0;
+                                }
 
+                                ulong shifted = 0;
+                                if (bitType == DefType.u8) {
+                                    shifted = (byte)value;
+                                } else if (bitType == DefType.u16) {
+                                    shifted = (ushort)value;
+                                } else if (bitType == DefType.u32) {
+                                    shifted = (uint)value;
+                                }
+                                // Shift left first to clear any out-of-range bits
+                                shifted = shifted << (BIT_VALUE_SIZE - field.BitSize) >> (BIT_VALUE_SIZE - field.BitSize - bitOffset);
+                                bitValue |= shifted;
+                                bitOffset += field.BitSize;
+
+                                if (i == l_pre || IsWritable(bitOffset, bitType, type, cells.At(i + 8).Def)) {
+                                    bitOffset = -1;
+                                    if (bitType == DefType.u8) {
+                                        bw.WriteByte((byte)bitValue);
+                                    } else if (bitType == DefType.u16) {
+                                        bw.WriteUInt16((ushort)bitValue);
+                                    } else if (bitType == DefType.u32) {
+                                        bw.WriteUInt32((uint)bitValue);
+                                    }
+                                }
+                            }
                             break;
+                        default:
+                            throw new NotImplementedException($"Unsupported field type: {type}");
                     }
                 }
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                static bool IsWritable(int bitOffset, DefType bitType, DefType type, PARAMDEF.Field nextField) =>
+                    !ParamUtil.IsBitType(nextField.DisplayType) || nextField.BitSize == -1 || bitOffset + nextField.BitSize > ParamUtil.GetBitLimit(bitType) || defTypesChange[(int)type] != bitType;
             }
 
             internal void WriteName(BinaryWriterEx bw, PARAM parent, int i) {
