@@ -51,6 +51,11 @@ namespace SoulsFormats {
         public List<Row> Rows;
 
         /// <summary>
+        /// Cells contained in this row. Must be loaded with PARAM.ApplyParamdef() before use.
+        /// </summary>
+        public Allocator MiniCellsAllocator;
+
+        /// <summary>
         /// The current applied PARAMDEF.
         /// </summary>
         public PARAMDEF AppliedParamdef { get; private set; }
@@ -104,9 +109,9 @@ namespace SoulsFormats {
             }
 
             List<Row> rows = this.Rows = new List<Row>(rowCount);
-            Row[] rowsArray = rows.AsContents();
-            for (int i = 16, end = i + (rowCount << 3); i < end; i += 8) {
-                rowsArray.AssignAt(i, new Row(br, this, ref actualStringsOffset));
+            ref Row rowRef = ref MemoryMarshal.GetArrayDataReference(this.Rows.AsContents());
+            for (ref Row end = ref Unsafe.Add(ref rowRef, rowCount); Unsafe.IsAddressLessThan(ref rowRef, ref end); rowRef = ref Unsafe.Add(ref rowRef, 1)) {
+                rowRef = new Row(br, this, ref actualStringsOffset);
             }
             rows.SetLength(rowCount);
 
@@ -156,7 +161,7 @@ namespace SoulsFormats {
                 bw.WriteInt64(0);
             }
 
-            for (int i = 0; i < this.Rows.Count; i++) {
+            for (var i = 0; i < this.Rows.Count; i++) {
                 this.Rows[i].WriteHeader(bw, this, i);
             }
 
@@ -173,7 +178,7 @@ namespace SoulsFormats {
                 bw.FillUInt16("DataStart", (ushort)bw.Position);
             }
 
-            for (int i = 0; i < this.Rows.Count; i++) {
+            for (var i = 0; i < this.Rows.Count; i++) {
                 this.Rows[i].WriteCells(bw, this, i);
             }
 
@@ -184,7 +189,7 @@ namespace SoulsFormats {
                 bw.WriteASCII(this.ParamType, true);
             }
 
-            for (int i = 0; i < this.Rows.Count; i++) {
+            for (var i = 0; i < this.Rows.Count; i++) {
                 this.Rows[i].WriteName(bw, this, i);
             }
             // DeS and BB sometimes (but not always) include some useless padding here
@@ -195,35 +200,32 @@ namespace SoulsFormats {
         /// </summary>
         public void ApplyParamdef(PARAMDEF paramdef) {
             this.AppliedParamdef = paramdef;
-            Row[] rows = this.Rows.AsContents();
-            for (int i = 16, l = this.Rows.Count * Unsafe.SizeOf<Row>() + 16; i < l; i += Unsafe.SizeOf<Row>()) {
-                rows.At(i).ReadCells(this.RowReader, paramdef);
+            this.MiniCellsAllocator = paramdef.FieldBitOffsetMap.CreateAllocator((nuint)this.Rows.Count);
+            ref Row rows = ref MemoryMarshal.GetArrayDataReference(this.Rows.AsContents());
+            for (ref Row end = ref Unsafe.Add(ref rows, this.Rows.Count); Unsafe.IsAddressLessThan(ref rows, ref end); rows = ref Unsafe.Add(ref rows, 1)) {
+                rows.ReadCells(this.RowReader, paramdef);
             }
+            this.RowReader.Stream.Dispose();
+            this.RowReader = null;
         }
 
         /// <summary>
         /// Applies a paramdef only if its param type, data version, and row size match this param's. Returns true if applied.
         /// </summary>
         public bool ApplyParamdefCarefully(PARAMDEF paramdef) {
-            if (this.ParamType == paramdef.ParamType && this.ParamdefDataVersion == paramdef.DataVersion
-                && (this.DetectedSize == -1 || this.DetectedSize == paramdef.GetRowSize())) {
-                this.ApplyParamdef(paramdef);
-                return true;
-            }
-            return false;
+            //if (paramdef.ParamType.Contains("WW", StringComparison.InvariantCultureIgnoreCase) && this.ParamType.Contains("WW", StringComparison.InvariantCultureIgnoreCase)) {
+            //    new object();
+            //}
+            if (this.ParamType != paramdef.ParamType || this.ParamdefDataVersion != paramdef.DataVersion
+                                                     || (this.DetectedSize != -1 && this.DetectedSize != paramdef.GetRowSize())) return false;
+            this.ApplyParamdef(paramdef);
+            return true;
         }
 
         /// <summary>
         /// Applies the first paramdef in the sequence whose param type, data version, and row size match this param's, if any. Returns true if applied. 
         /// </summary>
-        public bool ApplyParamdefCarefully(IEnumerable<PARAMDEF> paramdefs) {
-            foreach (PARAMDEF paramdef in paramdefs) {
-                if (this.ApplyParamdefCarefully(paramdef)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        public bool ApplyParamdefCarefully(IEnumerable<PARAMDEF> paramdefs) => paramdefs.Any(this.ApplyParamdefCarefully);
 
         /// <summary>
         /// Returns the first row with the given ID, or null if not found.

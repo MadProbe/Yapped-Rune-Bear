@@ -98,7 +98,7 @@ namespace SoulsFormats.Formats.PARAM {
         /// </summary>
         /// <param name="Name">Name given to this value.</param>
         /// <param name="Value">Value of this entry, of the same type as the parent TDF.</param>
-        public record class Entry(string Name, object Value) {
+        public readonly record struct Entry(string Name, object Value) {
             /// <summary>
             /// Returns a string representation of the Entry.
             /// </summary>

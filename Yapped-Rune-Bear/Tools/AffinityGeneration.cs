@@ -15,7 +15,7 @@ namespace Chomp.Tools {
                 Utility.ShowError("You can't generate Affinity rows without a row selected!");
                 return;
             }
-            const string configDir = "Tools\\AffinityGeneration\\\\";
+            const string configDir = "Tools/AffinityGeneration/";
             if (!Directory.Exists(configDir)) {
                 Utility.ShowError("Affinity Generation configuration directory not found.");
                 return;
@@ -28,21 +28,13 @@ namespace Chomp.Tools {
                 string[] splitted = rawName.Split(separator: '-');
                 string offset = splitted[0].Trim();
                 string name = splitted[1].Trim().Replace(".txt", "");
-                var instructions = new List<string[]>();
-                using (var reader = new StreamReader(file.FullName)) {
-                    while (!reader.EndOfStream) {
-                        string[] values = reader.ReadLine().Split(separator: ';');
-                        instructions.Add(values);
-                    }
-                }
-                int num = currentRow.ID + Convert.ToInt32(offset);
-                string new_name = currentRow.Name + " [" + name + "]";
-                var newRow = new PARAM.Row(num, new_name, wrapper.AppliedParamDef);
+                var newRow = new PARAM.Row(currentRow.ID + Convert.ToInt32(offset), $"{currentRow.Name} [{name}]", wrapper.Param);
                 for (int i = 0; i < currentRow.Cells.Count; i++) {
                     newRow.Cells[i].Value = currentRow.Cells[i].Value;
                 }
-                foreach (string[] instruction in instructions) {
-                    ModifyAffinityField(currentRow, newRow, instruction);
+                using var reader = new StreamReader(file.FullName);
+                while (!reader.EndOfStream) {
+                    ModifyAffinityField(currentRow, newRow, reader.ReadLine().Split(separator: ';'));
                 }
                 wrapper.Rows.Add(newRow);
                 wrapper.Rows.Sort((r1, r2) => r1.ID.CompareTo(r2.ID));
@@ -66,7 +58,7 @@ namespace Chomp.Tools {
             string base_FIRE_damage = "";
             string base_LIGHTNING_damage = "";
             string base_HOLY_damage = "";
-            foreach (PARAM.Cell cell in baseRow.Cells) {
+            foreach (PARAM.ICell cell in baseRow.Cells) {
                 PARAMDEF.DefType type = cell.Def.DisplayType;
                 string name = cell.Def.InternalName.ToString();
                 string value = cell.Value.ToString();
@@ -102,7 +94,7 @@ namespace Chomp.Tools {
             }.Max(Convert.ToSingle);
             string base_HIGHEST_correction = Convert.ToString(highest_value);
             int index = 0;
-            foreach (PARAM.Cell cell2 in row.Cells) {
+            foreach (PARAM.ICell cell2 in row.Cells) {
                 PARAMDEF.DefType type2 = cell2.Def.DisplayType;
                 string name2 = cell2.Def.InternalName;
                 _ = cell2.Value.ToString();

@@ -200,10 +200,9 @@ namespace SoulsFormats.Binder {
                 bw.ReserveInt32($"FileNameOffset{index}");
             }
 
-            if (format == Format.Names1) {
-                bw.WriteInt32(this.ID);
-                bw.WriteInt32(0);
-            }
+            if (format != Format.Names1) return;
+            bw.WriteInt32(this.ID);
+            bw.WriteInt32(0);
         }
 
         private void WriteFileData(BinaryWriterEx bw, byte[] bytes) {
@@ -256,13 +255,12 @@ namespace SoulsFormats.Binder {
         }
 
         internal void WriteFileName(BinaryWriterEx bw, Format format, bool unicode, int index) {
-            if (HasNames(format)) {
-                bw.FillInt32($"FileNameOffset{index}", (int)bw.Position);
-                if (unicode) {
-                    bw.WriteUTF16(this.Name, true);
-                } else {
-                    bw.WriteShiftJIS(this.Name, true);
-                }
+            if (!HasNames(format)) return;
+            bw.FillInt32($"FileNameOffset{index}", (int)bw.Position);
+            if (unicode) {
+                bw.WriteUTF16(this.Name, true);
+            } else {
+                bw.WriteShiftJIS(this.Name, true);
             }
         }
     }

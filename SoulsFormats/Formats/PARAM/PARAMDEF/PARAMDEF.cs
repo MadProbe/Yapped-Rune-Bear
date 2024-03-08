@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Xml;
 using SoulsFormats.Formats.PARAM;
 using SoulsFormats.Util;
 
@@ -44,6 +45,11 @@ namespace SoulsFormats {
         /// Whether field default, minimum, maximum, and increment may be variable type. If false, they are always floats.
         /// </summary>
         public bool VariableEditorValueTypes => this.FormatVersion >= 203;
+
+        /// <summary>
+        /// Field Offset Map.
+        /// </summary>
+        public FieldBitOffsetMap FieldBitOffsetMap;
 
         /// <summary>
         /// Fields in each param row, in order of appearance.
@@ -113,40 +119,38 @@ namespace SoulsFormats {
                 throw new InvalidDataException($"Unexpected field size 0x{fieldSize:X} for version {this.FormatVersion}.");
             }
 
-            Field[] fields = (this.Fields = new List<Field>(fieldCount)).AsContents();
-            for (int i = 16, l = (fieldCount << 3) + 16; i < l; i += 16) {
-                fields.AssignAt(i, new Field(br, this));
+            ref Field fields = ref MemoryMarshal.GetArrayDataReference((this.Fields = new List<Field>(fieldCount)).AsContents());
+            this.Fields.SetLength(fieldCount);
+            for (ref Field end = ref Unsafe.Add(ref fields, fieldCount); Unsafe.IsAddressLessThan(ref fields, ref end); fields = ref Unsafe.Add(ref fields, 1)) {
+                fields = new Field(br, this);
             }
+            this.FieldBitOffsetMap = new FieldBitOffsetMap(this.Fields);
         }
 
         /// <summary>
         /// Verifies that the file can be written safely.
         /// </summary>
-        public override bool Validate(out Exception ex) {
-            const string FIELD_NAME = nameof(Fields);
+        public override bool Validate([NotNullWhen(returnValue: false)] out Exception ex) {
             if (this.FormatVersion is not (101 or 102 or 103 or 104 or 106
-                or 201 or 202 or 203)) {
-                ex = new InvalidDataException($"Unknown version: {this.FormatVersion}");
+                or 201 or 202 or 203) && (ex = new InvalidDataException($"Unknown version: {this.FormatVersion}")) is not null
+                || !ValidateNull(this.ParamType, static () => $"{nameof(this.ParamType)} can't be null.", out ex)
+                || !ValidateNull(this.Fields,    static () => $"{nameof(this.Fields)} can't be null.",    out ex)) {
                 return false;
             }
 
-            if (!ValidateNull(this.ParamType, () => $"{nameof(ParamType)} can't be null.", out ex)
-                || !ValidateNull(this.Fields, () => $"{FIELD_NAME} can't be null.", out ex)) {
-                return false;
-            }
             Field[] fields = this.Fields.AsContents();
-            for (int i = 16, l = (this.Fields.Count << 3) + 16; i < l; i += 8) {
+            for (int i = 16, l = this.Fields.Count * Unsafe.SizeOf<Field>() + 16; i < l; i += 8) {
                 Field field = fields.At(i);
-                if (!ValidateNull(field, () => $"{FIELD_NAME}[{(i - 16) >> 3}]: {nameof(Field)} can't be null.", out ex)
-                    || !ValidateNull(field.DisplayName, () => $"{FIELD_NAME}[{(i - 16) >> 3}]: {nameof(Field.DisplayName)} can't be null.", out ex)
-                    || !ValidateNull(field.DisplayFormat, () => $"{FIELD_NAME}[{(i - 16) >> 3}]: {nameof(Field.DisplayFormat)} can't be null.", out ex)
-                    || !ValidateNull(field.InternalType, () => $"{FIELD_NAME}[{(i - 16) >> 3}]: {nameof(Field.InternalType)} can't be null.", out ex)
-                    || this.FormatVersion >= 102 && !ValidateNull(field.InternalName, () => $"{FIELD_NAME}[{(i - 16) >> 3}]: {nameof(Field.InternalName)} can't be null on version {this.FormatVersion}.", out ex)) {
+                if (!ValidateNull(field, () => $"{nameof(this.Fields)}[{(i - 16) >> 3}]: {nameof(Field)} can't be null.", out ex)
+                    || !ValidateNull(field.DisplayName, () => $"{nameof(this.Fields)}[{(i - 16) >> 3}]: {nameof(Field.DisplayName)} can't be null.", out ex)
+                    || !ValidateNull(field.DisplayFormat, () => $"{nameof(this.Fields)}[{(i - 16) >> 3}]: {nameof(Field.DisplayFormat)} can't be null.", out ex)
+                    || !ValidateNull(field.InternalType, () => $"{nameof(this.Fields)}[{(i - 16) >> 3}]: {nameof(Field.InternalType)} can't be null.", out ex)
+                    || this.FormatVersion >= 102 && !ValidateNull(field.InternalName, () => $"{nameof(this.Fields)}[{(i - 16) >> 3}]: {nameof(Field.InternalName)} can't be null on version {this.FormatVersion}.", out ex)) {
                     return false;
                 }
             }
 
-            ex = null;
+            Unsafe.SkipInit(out ex);
             return true;
         }
 
@@ -178,6 +182,8 @@ namespace SoulsFormats {
                 bw.WriteInt16(0x68);
             } else if (this.FormatVersion == 203) {
                 bw.WriteInt16(0x88);
+            } else {
+                bw.WriteInt16(0x00);
             }
 
             if (this.FormatVersion >= 202) {

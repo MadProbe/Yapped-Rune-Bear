@@ -34,7 +34,7 @@ namespace SoulsFormats.Binder {
         /// <summary>
         /// Creates a new file with 0 bytes and no ID or name.
         /// </summary>
-        public BinderFile() : this(FileFlags.Flag1, -1, null, Array.Empty<byte>()) { }
+        public BinderFile() : this(FileFlags.Flag1, -1, null, []) { }
 
         /// <summary>
         /// Creates a new file with no ID or name.

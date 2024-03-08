@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using SoulsFormats.Formats.PARAM;
 using SoulsFormats.Util;
 
@@ -253,14 +250,14 @@ namespace SoulsFormats {
                 }
 
                 this.InternalType = def.FormatVersion is >= 202 or >= 106 and < 200
-                    ? br.GetASCII(br.ReadVarint()).Trim()
-                    : br.ReadFixStr(0x20).Trim();
+                    ? br.GetASCII(br.ReadVarint()).TrimEnd()
+                    : br.ReadFixStr(0x20).TrimEnd();
 
                 this.BitSize = -1;
                 if (def.FormatVersion >= 102) {
                     this.InternalName = def.FormatVersion is >= 202 or >= 106 and < 200
-                        ? br.GetASCII(br.ReadVarint()).Trim()
-                        : br.ReadFixStr(0x20).Trim();
+                        ? br.GetASCII(br.ReadVarint()).TrimEnd()
+                        : br.ReadFixStr(0x20).TrimEnd();
 
                     Match match = bitSizeRx.Match(this.InternalName);
                     if (match.Success) {
@@ -285,73 +282,79 @@ namespace SoulsFormats {
                     this.SortID = br.ReadInt32();
                 }
 
-                if (def.FormatVersion >= 200) {
-                    _ = br.AssertInt32(0);
-                    long unkB8Offset = br.ReadInt64();
-                    long unkC0Offset = br.ReadInt64();
-                    long unkC8Offset = br.ReadInt64();
+                switch (def.FormatVersion) {
+                    case >= 200: {
+                        _ = br.AssertInt32(0);
+                        long unkB8Offset = br.ReadInt64();
+                        long unkC0Offset = br.ReadInt64();
+                        long unkC8Offset = br.ReadInt64();
 
-                    if (unkB8Offset != 0) {
-                        this.UnkB8 = br.GetASCII(unkB8Offset);
-                    }
-
-                    if (unkC0Offset != 0) {
-                        this.UnkC0 = br.GetASCII(unkC0Offset);
-                    }
-
-                    if (unkC8Offset != 0) {
-                        this.UnkC8 = br.GetUTF16(unkC8Offset);
-                    }
-                } else if (def.FormatVersion >= 106) {
-                    _ = br.AssertInt32(0);
-                    _ = br.AssertInt32(0);
-                    _ = br.AssertInt32(0);
-                }
-
-                if (def.FormatVersion >= 203) {
-                    object readVariableValue() {
-                        object value;
-                        switch (this.DisplayType) {
-                            case DefType.s8:
-                            case DefType.u8:
-                            case DefType.s16:
-                            case DefType.u16:
-                            case DefType.s32:
-                            case DefType.u32:
-                            case DefType.b32:
-                                value = br.ReadInt32();
-                                _ = br.AssertInt32(0);
-                                break;
-
-                            case DefType.f32:
-                            case DefType.angle32:
-                                value = br.ReadSingle();
-                                _ = br.AssertInt32(0);
-                                break;
-
-                            case DefType.f64:
-                                value = br.ReadDouble();
-                                break;
-
-                            // Given that there are 8 bytes available, these could possibly be offsets
-                            case DefType.dummy8:
-                            case DefType.fixstr:
-                            case DefType.fixstrW:
-                                value = null;
-                                _ = br.AssertInt64(0);
-                                break;
-
-                            default:
-                                throw new NotImplementedException($"Missing variable read for type: {this.DisplayType}");
+                        if (unkB8Offset != 0) {
+                            this.UnkB8 = br.GetASCII(unkB8Offset);
                         }
-                        return value;
-                    }
 
-                    this.Default = readVariableValue();
-                    this.Minimum = readVariableValue();
-                    this.Maximum = readVariableValue();
-                    this.Increment = readVariableValue();
+                        if (unkC0Offset != 0) {
+                            this.UnkC0 = br.GetASCII(unkC0Offset);
+                        }
+
+                        if (unkC8Offset != 0) {
+                            this.UnkC8 = br.GetUTF16(unkC8Offset);
+                        }
+
+                        break;
+                    }
+                    case >= 106:
+                        _ = br.AssertInt32(0);
+                        _ = br.AssertInt32(0);
+                        _ = br.AssertInt32(0);
+                        break;
                 }
+
+                if (def.FormatVersion < 203) return;
+
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                object readVariableValue() {
+                    object value;
+                    switch (this.DisplayType) {
+                        case DefType.s8:
+                        case DefType.u8:
+                        case DefType.s16:
+                        case DefType.u16:
+                        case DefType.s32:
+                        case DefType.u32:
+                        case DefType.b32:
+                            value = br.ReadInt32();
+                            _     = br.AssertInt32(0);
+                            break;
+
+                        case DefType.f32:
+                        case DefType.angle32:
+                            value = br.ReadSingle();
+                            _     = br.AssertInt32(0);
+                            break;
+
+                        case DefType.f64:
+                            value = br.ReadDouble();
+                            break;
+
+                        // Given that there are 8 bytes available, these could possibly be offsets
+                        case DefType.dummy8:
+                        case DefType.fixstr:
+                        case DefType.fixstrW:
+                            value = null;
+                            _     = br.AssertInt64(0);
+                            break;
+
+                        default:
+                            throw new NotImplementedException($"Missing variable read for type: {this.DisplayType}");
+                    }
+                    return value;
+                }
+
+                this.Default   = readVariableValue();
+                this.Minimum   = readVariableValue();
+                this.Maximum   = readVariableValue();
+                this.Increment = readVariableValue();
             }
 
             internal void Write(BinaryWriterEx bw, PARAMDEF def, int index) {

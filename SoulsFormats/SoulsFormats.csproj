@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-windows</TargetFrameworks>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Copyright>Copyright © Joseph Anderson 2019</Copyright>
 		<Description>A .NET library for reading and writing FromSoftware file formats.</Description>
@@ -9,28 +9,21 @@
 		<PackageProjectUrl>https://github.com/JKAnderson/SoulsFormats</PackageProjectUrl>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<TieredPGO>True</TieredPGO>
+		<!--
 		<PublishAot>True</PublishAot>
 		<PublishTrimmed>True</PublishTrimmed>
-		<Nullable>annotations</Nullable>
-		<PlatformTarget>x64</PlatformTarget>
+		<SelfContained>true</SelfContained>
 		<PublishSingleFile>True</PublishSingleFile>
+		-->
+		<Nullable>disable</Nullable>
+		<PlatformTarget>x64</PlatformTarget>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Platforms>x64</Platforms>
 		<SuppressNETCoreSdkPreviewMessage>True</SuppressNETCoreSdkPreviewMessage>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows|x64'">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
+	<PropertyGroup>
+		<NoWarn>1701;1702;0649;0169;1591;CS9080;CA1050;CS9057;CS9084;NU1701;CS8500</NoWarn>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows|AnyCPU'">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows|x64'">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows|AnyCPU'">
-	  <NoWarn>1701;1702;NU1701</NoWarn>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Fody" Version="6.6.4" PrivateAssets="All">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -40,7 +33,7 @@
 		<PackageReference Include="System.Memory" Version="4.5.5" />
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
 		<PackageReference Include="Tail.Fody" Version="0.0.2" PrivateAssets="All">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
 
@@ -53,6 +46,9 @@
 	<ItemGroup>
 		<Using Include="System.Runtime.CompilerServices" />
 		<Using Include="UnsafeCode" />
+		<Using Include="System.Diagnostics" />
+		<Using Include="System.Runtime.InteropServices" />
+		<Using Include="System.Numerics" />
 		<Using Include="UnsafeCode.Pointers" Static="True" />
 	</ItemGroup>
 </Project>

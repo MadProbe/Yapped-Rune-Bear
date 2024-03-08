@@ -368,7 +368,7 @@ namespace SoulsFormats.Formats {
         /// Encryption information for a file in the dvdbnd.
         /// </summary>
         public class AESKey {
-            private static readonly Aes AES = Aes.Create();
+            private static readonly System.Security.Cryptography.Aes AES = System.Security.Cryptography.Aes.Create();
             static AESKey() {
                 AES.Mode = CipherMode.ECB;
                 AES.Padding = PaddingMode.None;

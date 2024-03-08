@@ -62,64 +62,69 @@ namespace SoulsFormats.Formats {
             br.BigEndian = true;
             type = Type.Unknown;
 
-            string magic = br.ReadASCII(4);
-            if (magic == "DCP\0") {
-                string format = br.GetASCII(4, 4);
-                if (format == "DFLT") {
-                    type = Type.DCP_DFLT;
-                } else if (format == "EDGE") {
-                    type = Type.DCP_EDGE;
-                }
-            } else if (magic == "DCX\0") {
-                string format = br.GetASCII(0x28, 4);
-                if (format == "EDGE") {
-                    type = Type.DCX_EDGE;
-                } else if (format == "DFLT") {
-                    int unk04 = br.GetInt32(0x4);
-                    int unk10 = br.GetInt32(0x10);
-                    byte unk30 = br.GetByte(0x30);
-                    byte unk38 = br.GetByte(0x38);
+            switch (br.ReadASCII(4)) {
+                case "DCP\0":
+                    type = br.GetASCII(4, 4) switch {
+                        "DFLT" => Type.DCP_DFLT,
+                        "EDGE" => Type.DCP_EDGE,
+                        _      => type
+                    };
+                    break;
+                case "DCX\0":
+                    switch (br.GetASCII(0x28, 4)) {
+                        case "EDGE":
+                            type = Type.DCX_EDGE;
+                            break;
+                        case "DFLT": {
+                            int  unk04 = br.GetInt32(0x4);
+                            int  unk10 = br.GetInt32(0x10);
+                            byte unk30 = br.GetByte(0x30);
+                            byte unk38 = br.GetByte(0x38);
 
-                    if (unk04 == 0x10000 && unk10 == 0x24 && unk30 == 9 && unk38 == 0) {
-                        type = Type.DCX_DFLT_10000_24_9;
-                    } else if (unk04 == 0x10000 && unk10 == 0x44 && unk30 == 9 && unk38 == 0) {
-                        type = Type.DCX_DFLT_10000_44_9;
-                    } else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 8 && unk38 == 0) {
-                        type = Type.DCX_DFLT_11000_44_8;
-                    } else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 9 && unk38 == 0) {
-                        type = Type.DCX_DFLT_11000_44_9;
-                    } else if (unk04 == 0x11000 && unk10 == 0x44 && unk30 == 9 && unk38 == 15) {
-                        type = Type.DCX_DFLT_11000_44_9_15;
+                            type = unk04 switch {
+                                0x10000 when unk10 == 0x24 && unk30 == 9 && unk38 == 0  => Type.DCX_DFLT_10000_24_9,
+                                0x10000 when unk10 == 0x44 && unk30 == 9 && unk38 == 0  => Type.DCX_DFLT_10000_44_9,
+                                0x11000 when unk10 == 0x44 && unk30 == 8 && unk38 == 0  => Type.DCX_DFLT_11000_44_8,
+                                0x11000 when unk10 == 0x44 && unk30 == 9 && unk38 == 0  => Type.DCX_DFLT_11000_44_9,
+                                0x11000 when unk10 == 0x44 && unk30 == 9 && unk38 == 15 => Type.DCX_DFLT_11000_44_9_15,
+                                _                                                       => type,
+                            };
+                            break;
+                        }
+                        case "KRAK":
+                            type = Type.DCX_KRAK;
+                            break;
                     }
-                } else if (format == "KRAK") {
-                    type = Type.DCX_KRAK;
-                }
-            } else {
-                byte b0 = br.GetByte(0);
-                byte b1 = br.GetByte(1);
-                if (b0 == 0x78 && (b1 == 0x01 || b1 == 0x5E || b1 == 0x9C || b1 == 0xDA)) {
-                    type = Type.Zlib;
+
+                    break;
+                default: {
+                    if (br.GetByte(0) == 0x78 && br.GetByte(1) is 0x01 or 0x5E or 0x9C or 0xDA) {
+                        type = Type.Zlib;
+                    }
+
+                    break;
                 }
             }
+            
 
             br.Position = 0;
-            if (type == Type.Zlib) {
-                return SFUtil.ReadZlib(br, (int)br.Length);
-            } else {
-                return type == Type.DCP_EDGE
+            return type == Type.Zlib
+                ? SFUtil.ReadZlib(br, (int)br.Length)
+                : type == Type.DCP_EDGE
                     ? DecompressDCPEDGE(br)
                     : type == Type.DCP_DFLT
-                                    ? DecompressDCPDFLT(br)
-                                    : type == Type.DCX_EDGE
-                                                    ? DecompressDCXEDGE(br)
-                                                    : type is Type.DCX_DFLT_10000_24_9
-                                                                                or Type.DCX_DFLT_10000_44_9
-                                                                                or Type.DCX_DFLT_11000_44_8
-                                                                                or Type.DCX_DFLT_11000_44_9
-                                                                                or Type.DCX_DFLT_11000_44_9_15
-                                                                    ? DecompressDCXDFLT(br, type)
-                                                                    : type == Type.DCX_KRAK ? DecompressDCXKRAK(br) : throw new FormatException("Unknown DCX format.");
-            }
+                        ? DecompressDCPDFLT(br)
+                        : type == Type.DCX_EDGE
+                            ? DecompressDCXEDGE(br)
+                            : type is Type.DCX_DFLT_10000_24_9
+                                      or Type.DCX_DFLT_10000_44_9
+                                      or Type.DCX_DFLT_11000_44_8
+                                      or Type.DCX_DFLT_11000_44_9
+                                      or Type.DCX_DFLT_11000_44_9_15
+                                ? DecompressDCXDFLT(br, type)
+                                : type == Type.DCX_KRAK
+                                    ? DecompressDCXKRAK(br)
+                                    : throw new FormatException("Unknown DCX format.");
         }
 
         private static byte[] DecompressDCPDFLT(BinaryReaderEx br) {
@@ -354,24 +359,31 @@ namespace SoulsFormats.Formats {
 
         internal static void Compress(byte[] data, BinaryWriterEx bw, Type type) {
             bw.BigEndian = true;
-            if (type == Type.Zlib) {
-                _ = SFUtil.WriteZlib(bw, 0xDA, data);
-            } else if (type == Type.DCP_DFLT) {
-                CompressDCPDFLT(data, bw);
-            } else if (type == Type.DCX_EDGE) {
-                CompressDCXEDGE(data, bw);
-            } else if (type is Type.DCX_DFLT_10000_24_9
-                or Type.DCX_DFLT_10000_44_9
-                or Type.DCX_DFLT_11000_44_8
-                or Type.DCX_DFLT_11000_44_9
-                or Type.DCX_DFLT_11000_44_9_15) {
-                CompressDCXDFLT(data, bw, type);
-            } else if (type == Type.DCX_KRAK) {
-                CompressDCXKRAK(data, bw);
-            } else if (type == Type.Unknown) {
-                throw new ArgumentException("You cannot compress a DCX with an unknown type.");
-            } else {
-                throw new NotImplementedException("Compression for the given type is not implemented.");
+
+            switch (type) {
+                case Type.Zlib:
+                    _ = SFUtil.WriteZlib(bw, 0xDA, data);
+                    break;
+                case Type.DCP_DFLT:
+                    CompressDCPDFLT(data, bw);
+                    break;
+                case Type.DCX_EDGE:
+                    CompressDCXEDGE(data, bw);
+                    break;
+                case Type.DCX_DFLT_10000_24_9
+                     or Type.DCX_DFLT_10000_44_9
+                     or Type.DCX_DFLT_11000_44_8
+                     or Type.DCX_DFLT_11000_44_9
+                     or Type.DCX_DFLT_11000_44_9_15:
+                    CompressDCXDFLT(data, bw, type);
+                    break;
+                case Type.DCX_KRAK:
+                    CompressDCXKRAK(data, bw);
+                    break;
+                case Type.Unknown:
+                    throw new ArgumentException("You cannot compress a DCX with an unknown type.");
+                default:
+                    throw new NotImplementedException("Compression for the given type is not implemented.");
             }
         }
 
@@ -529,13 +541,15 @@ namespace SoulsFormats.Formats {
             bw.WriteASCII("DCA\0");
             bw.WriteInt32(8);
 
-            long compressedStart = bw.Position;
-            _ = SFUtil.WriteZlib(bw, 0xDA, data);
-            bw.FillInt32("CompressedSize", (int)(bw.Position - compressedStart));
+            //long compressedStart = bw.Position;
+            int writtenBytes    = SFUtil.WriteZlib(bw, 0xDA, data);
+            //var  writtenBytesAllegedly      = (int)(bw.Position - compressedStart);
+            //if (writtenBytes != writtenBytesAllegedly) throw new InvalidOperationException($"return value of {nameof(SFUtil.WriteZlib)}() != calculated number of bytes written");
+            bw.FillInt32("CompressedSize", writtenBytes);
         }
 
         private static void CompressDCXKRAK(byte[] data, BinaryWriterEx bw) {
-            byte[] compressed = Oodle26.Compress(data, Oodle26.OodleLZ_Compressor.OodleLZ_Compressor_Kraken, Oodle26.OodleLZ_CompressionLevel.OodleLZ_CompressionLevel_Optimal2);
+            byte[] compressed = Oodle26.Compress(data, Oodle26.OodleLZ_Compressor.OodleLZ_Compressor_Kraken, Oodle26.OodleLZ_CompressionLevel.OodleLZ_CompressionLevel_Optimal5);
 
             bw.WriteASCII("DCX\0");
             bw.WriteInt32(0x11000);

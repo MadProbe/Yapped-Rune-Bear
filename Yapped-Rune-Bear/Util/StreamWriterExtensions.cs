@@ -1,5 +1,5 @@
 ﻿using System.Runtime.Intrinsics.X86;
-using Cell = SoulsFormats.PARAM.Cell;
+using ICell = SoulsFormats.PARAM.ICell;
 using DefType = SoulsFormats.PARAMDEF.DefType;
 using int32_t = System.Int32;
 using int64_t = System.Int64;
@@ -17,16 +17,17 @@ namespace Chomp.Util {
                    10000000000UL, uint64_t.MaxValue, uint64_t.MaxValue, uint64_t.MaxValue,          1000000000UL, uint64_t.MaxValue, uint64_t.MaxValue,          100000000UL, uint64_t.MaxValue, uint64_t.MaxValue,
                       10000000UL, uint64_t.MaxValue, uint64_t.MaxValue, uint64_t.MaxValue,             1000000UL, uint64_t.MaxValue, uint64_t.MaxValue,             100000UL, uint64_t.MaxValue, uint64_t.MaxValue,
                          10000UL, uint64_t.MaxValue, uint64_t.MaxValue, uint64_t.MaxValue,                1000UL, uint64_t.MaxValue, uint64_t.MaxValue,                100UL, uint64_t.MaxValue, uint64_t.MaxValue,
-                            10UL, uint64_t.MaxValue, uint64_t.MaxValue, uint64_t.MaxValue
+                            10UL, uint64_t.MaxValue, uint64_t.MaxValue, uint64_t.MaxValue,
         };
+        internal static readonly RefKeeper<uint64_t> thrRef = new (ref MemoryMarshal.GetArrayDataReference(thr));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe uint64_t ilog10(uint64_t v) {
             uint64_t lz = Lzcnt.X64.LeadingZeroCount(v);
-            return ((63 - lz) * 77UL >> 7) + CastTo<ulong, bool>(v >= thr.At(lz * 8 + 16));
+            return ((63 - lz) * 77UL >> 7) + CastTo<uint64_t, bool>(v >= Unsafe.Add(ref thrRef.Reference, CastTo<uint32_t, uint64_t>(lz)));
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe uint64_t ilog10(int64_t v) => ilog10(CastTo<uint64_t, int64_t>(v));
-        public static unsafe void WriteAllocfree(this StreamWriter stream, Cell cell) {
+        public static unsafe void WriteAllocfree(this StreamWriter stream, ICell cell) {
             switch (cell.Def.DisplayType) {
                 case DefType.s8:
                     stream.WriteAllocfree((sbyte)cell.Value);
@@ -115,7 +116,7 @@ namespace Chomp.Util {
             stream.GetInternalCharBuffer().AssignAnyAt((pos + 8) * sizeof(char), RN);
             pos += 2;
         }
-        public static unsafe void WriteLineAllocfree(this StreamWriter stream, Cell cell) {
+        public static unsafe void WriteLineAllocfree(this StreamWriter stream, ICell cell) {
             stream.WriteAllocfree(cell);
             stream.WriteNewline();
         }
@@ -257,12 +258,9 @@ namespace Chomp.Util {
                 stream.BaseStream.Write(stream.Encoding.Preamble);
             }
             Span<byte> span = stackalloc byte[stream.Encoding.GetMaxByteCount(bytesCount)];
-            var spanUnchecked = (ReadOnlySpanNoChecks<byte>*)&span;
-
-            spanUnchecked->length = stream.GetInternalEncoder().GetBytes(new ReadOnlySpan<char>(stream.GetInternalCharBuffer(), 0, bytesCount), span, false);
             stream.SetInternalCharBufferPosition(0);
 
-            stream.BaseStream.Write(*spanUnchecked);
+            stream.BaseStream.Write(span[..stream.GetInternalEncoder().GetBytes(new ReadOnlySpan<char>(stream.GetInternalCharBuffer(), 0, bytesCount), span, false)]);
         }
     }
 }

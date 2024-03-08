@@ -167,7 +167,7 @@ namespace SoulsFormats.Binder {
             /// <summary>
             /// Unknown.
             /// </summary>
-            Flag7 = 0b1000_0000,
+            Flag7 = 0b1000_0000
         }
 
         /// <summary>

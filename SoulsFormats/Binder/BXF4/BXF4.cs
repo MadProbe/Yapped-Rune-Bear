@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using SoulsFormats.Util;
+﻿using SoulsFormats.Util;
 
 namespace SoulsFormats.Binder.BXF4 {
     /// <summary>
@@ -196,23 +193,9 @@ namespace SoulsFormats.Binder.BXF4 {
             this.Extended = 4;
         }
 
-        private static bool IsBHD(BinaryReaderEx br) {
-            if (br.Length < 4) {
-                return false;
-            }
+        private static bool IsBHD(BinaryReaderEx br) => br.Length >= 4 && br.GetASCII(0, 4) == "BHF4";
 
-            string magic = br.GetASCII(0, 4);
-            return magic == "BHF4";
-        }
-
-        private static bool IsBDT(BinaryReaderEx br) {
-            if (br.Length < 4) {
-                return false;
-            }
-
-            string magic = br.GetASCII(0, 4);
-            return magic == "BDF4";
-        }
+        private static bool IsBDT(BinaryReaderEx br) => br.Length >= 4 && br.GetASCII(0, 4) == "BDF4";
 
         private BXF4(BinaryReaderEx bhdReader, BinaryReaderEx bdtReader) {
             ReadBDFHeader(bdtReader);
@@ -292,14 +275,14 @@ namespace SoulsFormats.Binder.BXF4 {
         }
 
         private void Write(BinaryWriterEx bhdWriter, BinaryWriterEx bdtWriter) {
-            var fileHeaders = new List<BinderFileHeader>(this.Files.Count);
-            foreach (BinderFile file in this.Files) {
-                fileHeaders.Add(new BinderFileHeader(file));
+            var fileHeaders = new BinderFileHeader[this.Files.Count];
+            for (int i = 0; i < fileHeaders.Length; i++) {
+                fileHeaders[i] = new BinderFileHeader(this.Files[i]);
             }
 
             WriteBDFHeader(this, bdtWriter);
             WriteBHFHeader(this, bhdWriter, fileHeaders);
-            for (int i = 0; i < this.Files.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteBinder4FileData(bhdWriter, bdtWriter, this.Format, i, this.Files[i].Bytes);
             }
         }
@@ -322,7 +305,7 @@ namespace SoulsFormats.Binder.BXF4 {
             bw.WriteInt64(0);
         }
 
-        internal static void WriteBHFHeader(IBXF4 bxf, BinaryWriterEx bw, List<BinderFileHeader> fileHeaders) {
+        internal static void WriteBHFHeader(IBXF4 bxf, BinaryWriterEx bw, BinderFileHeader[] fileHeaders) {
             bw.BigEndian = bxf.BigEndian;
 
             bw.WriteASCII("BHF4");
@@ -337,7 +320,7 @@ namespace SoulsFormats.Binder.BXF4 {
             bw.WriteBoolean(!bxf.BitBigEndian);
             bw.WriteByte(0);
 
-            bw.WriteInt32(fileHeaders.Count);
+            bw.WriteInt32(fileHeaders.Length);
             bw.WriteInt64(0x40);
             bw.WriteFixStr(bxf.Version, 8);
             bw.WriteInt64(Binder.GetBND4FileHeaderSize(bxf.Format));
@@ -351,11 +334,11 @@ namespace SoulsFormats.Binder.BXF4 {
             bw.WriteInt32(0);
             bw.ReserveInt64("HashTableOffset");
 
-            for (int i = 0; i < fileHeaders.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteBinder4FileHeader(bw, bxf.Format, bxf.BitBigEndian, i);
             }
 
-            for (int i = 0; i < fileHeaders.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteFileName(bw, bxf.Format, bxf.Unicode, i);
             }
 

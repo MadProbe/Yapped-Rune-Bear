@@ -35,11 +35,20 @@ namespace SoulsFormats.Util {
         protected internal virtual void Read(BinaryReaderEx br) => throw new NotImplementedException("Read is not implemented for this format.");
 
         /// <summary>
+        /// Loads a file from a stream, automatically decompressing it if necessary.
+        /// </summary>
+        public static TFormat Read(Stream bytes) {
+            BinaryReaderEx br = SFUtil.GetDecompressedBR(new BinaryReaderEx(false, bytes), out DCX.Type compression);
+            var file = new TFormat { Compression = compression };
+            file.Read(br);
+            return file;
+        }
+
+        /// <summary>
         /// Loads a file from a byte array, automatically decompressing it if necessary.
         /// </summary>
         public static TFormat Read(byte[] bytes) {
-            var br = new BinaryReaderEx(false, bytes);
-            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
+            BinaryReaderEx br = SFUtil.GetDecompressedBR(new BinaryReaderEx(false, bytes), out DCX.Type compression);
             var file = new TFormat { Compression = compression };
             file.Read(br);
             return file;
@@ -51,24 +60,23 @@ namespace SoulsFormats.Util {
         public static TFormat Read(string path) {
             using FileStream stream = File.OpenRead(path);
             BinaryReaderEx br = SFUtil.GetDecompressedBR(new BinaryReaderEx(false, stream), out DCX.Type compression);
-            var file = new TFormat() { Compression = compression };
+            var file = new TFormat { Compression = compression };
             file.Read(br);
             return file;
         }
 
         private static bool IsRead(BinaryReaderEx br, out TFormat file) {
             var test = new TFormat();
-            br = SFUtil.GetDecompressedBR(br, out DCX.Type compression);
-            if (test.Is(br)) {
+            if (test.Is(br = SFUtil.GetDecompressedBR(br, out DCX.Type compression))) {
                 br.Position = 0;
                 test.Compression = compression;
                 test.Read(br);
                 file = test;
                 return true;
-            } else {
-                file = null;
-                return false;
             }
+
+            file = null;
+            return false;
         }
 
         /// <summary>
@@ -113,16 +121,16 @@ namespace SoulsFormats.Util {
             if (index < 0 || index >= count) {
                 ex = new IndexOutOfRangeException(message);
                 return false;
-            } else {
-                ex = null;
-                return true;
             }
+
+            ex = null;
+            return true;
         }
 
         /// <summary>
         /// Writes file data to a BinaryWriterEx.
         /// </summary>
-        protected internal virtual void Write(BinaryWriterEx bw) => throw new NotImplementedException("Write is not implemented for this format.");
+        protected internal virtual void Write(BinaryWriterEx bw) => throw new NotImplementedException($"Write is not implemented for {typeof(TFormat).Name} format.");
 
         /// <summary>
         /// Writes file data to a BinaryWriterEx, compressing it afterwards if specified.

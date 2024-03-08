@@ -21,10 +21,11 @@ namespace SoulsFormats {
                 def.Unicode = root.ReadBoolean("Unicode");
                 def.FormatVersion = root.ReadInt16IfExist("FormatVersion") ?? root.ReadInt16("Version");
 
-                def.Fields = new List<Field>();
                 foreach (XmlNode node in root.SelectNodes("Fields/Field")) {
                     def.Fields.Add(DeserializeField(def, node));
                 }
+
+                def.FieldBitOffsetMap = new FieldBitOffsetMap(def.Fields);
 
                 return def;
             }

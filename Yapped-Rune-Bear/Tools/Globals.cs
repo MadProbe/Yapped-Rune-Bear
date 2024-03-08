@@ -202,7 +202,7 @@ namespace Chomp.Tools {
             stream.WriteLineAllocfree(text8);
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string[]? GetCellReferences(this Cell cell) => Main.refs_dict[cell.Def.Def.ParamType]?[cell.Def.InternalName];
+        public static string[] GetCellReferences(this ICell cell) => Main.refs_dict[cell.Def.Def.ParamType]?[cell.Def.InternalName];
         public static bool AddNoReplacement<T>(this List<T> list, T item) {
             if (list.Contains(item)) {
                 return false;

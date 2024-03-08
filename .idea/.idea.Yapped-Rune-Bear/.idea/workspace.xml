@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="07d47925-2712-467e-a07b-e854f1501ce5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/SoulsFormats/Util/BinaryReaderExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SoulsFormats/Util/BinaryWriterExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SoulsFormats/Util/SpanExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/AssemblyAdditionalInfoAttribute.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/FileWriter.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/StreamWriterExtensions.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/fast-dtoa.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dependencies/ManagedCodeShenanigans.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Dependencies/ManagedCodeShenanigans.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Binder/BND4/BND4.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Binder/BND4/BND4.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Binder/BXF4/BXF4.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Binder/BXF4/BXF4.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Binder/Binder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Binder/Binder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Binder/BinderFileHeader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Binder/BinderFileHeader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Binder/BinderHashTable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Binder/BinderHashTable.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/DCX.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/DCX.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/Cell.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/Cell.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/PARAM.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/PARAM.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/Row.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAM/Row.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/Field.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/Field.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/PARAMDEF.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/PARAMDEF.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/XmlSerializer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMDEF/XmlSerializer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMTDF.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/PARAMTDF.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/ParamUtil.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Formats/PARAM/ParamUtil.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/SoulsFormats.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/SoulsFormats.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/BinaryReaderEx.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/BinaryReaderEx.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/BinaryWriterEx.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/BinaryWriterEx.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/Oodle26.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/Oodle26.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/SFEncoding.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/SFEncoding.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/SFUtil.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/SFUtil.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SoulsFormats/Util/SoulsFile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/SoulsFormats/Util/SoulsFile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Main.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Main.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Main.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Main.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Tools/AffinityGeneration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Tools/AffinityGeneration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Tools/Globals.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Tools/Globals.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/IterativeStringSplitter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/IterativeStringSplitter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/ParamWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/ParamWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/Utility.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Util/Utility.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Yapped-Rune-Bear.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Yapped-Rune-Bear.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Yapped-Rune-Bear/Yapped-Rune-Bear.csproj.user" beforeDir="false" afterPath="$PROJECT_DIR$/Yapped-Rune-Bear/Yapped-Rune-Bear.csproj.user" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2P4ZBRRLWmD26GxELecl8M51fRn" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="07d47925-2712-467e-a07b-e854f1501ce5" name="Changes" comment="" />
+      <created>1682718185259</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1682718185259</updated>
+      <workItem from="1682718193385" duration="15000" />
+      <workItem from="1682718278838" duration="1195000" />
+      <workItem from="1682752848357" duration="20000" />
+      <workItem from="1682752901108" duration="175000" />
+      <workItem from="1682776602177" duration="172000" />
+    </task>
+    <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

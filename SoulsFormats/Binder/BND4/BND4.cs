@@ -8,17 +8,17 @@ namespace SoulsFormats.Binder.BND4 {
         /// <summary>
         /// The files contained within this BND4.
         /// </summary>
-        public List<BinderFile> Files { get; set; }
+        public List<BinderFile> Files { get; set; } = [];
 
         /// <summary>
         /// A timestamp or version number, 8 characters maximum.
         /// </summary>
-        public string Version { get; set; }
+        public string Version { get; set; } = SFUtil.DateToBinderTimestamp(DateTime.Now);
 
         /// <summary>
         /// Indicates the format of this BND4.
         /// </summary>
-        public Binder.Format Format { get; set; }
+        public Binder.Format Format { get; set; } = Binder.Format.IDs | Binder.Format.Names1 | Binder.Format.Names2 | Binder.Format.Compression;
 
         /// <summary>
         /// Unknown.
@@ -43,35 +43,22 @@ namespace SoulsFormats.Binder.BND4 {
         /// <summary>
         /// Whether to encode filenames as UTF-8 or Shift JIS.
         /// </summary>
-        public bool Unicode { get; set; }
+        public bool Unicode { get; set; } = true;
 
         /// <summary>
         /// Indicates presence of filename hash table.
         /// </summary>
-        public byte Extended { get; set; }
+        public byte Extended { get; set; } = 4;
 
         /// <summary>
         /// Creates an empty BND4 formatted for DS3.
         /// </summary>
-        public BND4() {
-            this.Files = new List<BinderFile>();
-            this.Version = SFUtil.DateToBinderTimestamp(DateTime.Now);
-            this.Format = Binder.Format.IDs | Binder.Format.Names1 | Binder.Format.Names2 | Binder.Format.Compression;
-            this.Unicode = true;
-            this.Extended = 4;
-        }
+        public BND4() { }
 
         /// <summary>
         /// Checks whether the data appears to be a file of this format.
         /// </summary>
-        protected internal override bool Is(BinaryReaderEx br) {
-            if (br.Length < 4) {
-                return false;
-            }
-
-            string magic = br.GetASCII(0, 4);
-            return magic == "BND4";
-        }
+        protected internal override bool Is(BinaryReaderEx br) => br.Length >= 4 && br.GetASCII(0, 4) == "BND4";
 
         /// <summary>
         /// Deserializes file data from a stream.
@@ -140,18 +127,18 @@ namespace SoulsFormats.Binder.BND4 {
         /// Serializes file data to a stream.
         /// </summary>
         protected internal override void Write(BinaryWriterEx bw) {
-            var fileHeaders = new List<BinderFileHeader>(this.Files.Count);
-            foreach (BinderFile file in this.Files) {
-                fileHeaders.Add(new BinderFileHeader(file));
+            var fileHeaders = new BinderFileHeader[this.Files.Count];
+            for (int i = 0; i < fileHeaders.Length; i++) {
+                fileHeaders[i] = new BinderFileHeader(this.Files[i]);
             }
 
             WriteHeader(this, bw, fileHeaders);
-            for (int i = 0; i < this.Files.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteBinder4FileData(bw, bw, this.Format, i, this.Files[i].Bytes);
             }
         }
 
-        internal static void WriteHeader(IBND4 bnd, BinaryWriterEx bw, List<BinderFileHeader> fileHeaders) {
+        internal static void WriteHeader(IBND4 bnd, BinaryWriterEx bw, BinderFileHeader[] fileHeaders) {
             bw.BigEndian = bnd.BigEndian;
 
             bw.WriteASCII("BND4");
@@ -166,7 +153,7 @@ namespace SoulsFormats.Binder.BND4 {
             bw.WriteBoolean(!bnd.BitBigEndian);
             bw.WriteByte(0);
 
-            bw.WriteInt32(fileHeaders.Count);
+            bw.WriteInt32(fileHeaders.Length);
             bw.WriteInt64(0x40);
             bw.WriteFixStr(bnd.Version, 8);
             bw.WriteInt64(Binder.GetBND4FileHeaderSize(bnd.Format));
@@ -180,11 +167,11 @@ namespace SoulsFormats.Binder.BND4 {
             bw.WriteInt32(0);
             bw.ReserveInt64("HashTableOffset");
 
-            for (int i = 0; i < fileHeaders.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteBinder4FileHeader(bw, bnd.Format, bnd.BitBigEndian, i);
             }
 
-            for (int i = 0; i < fileHeaders.Count; i++) {
+            for (int i = 0; i < fileHeaders.Length; i++) {
                 fileHeaders[i].WriteFileName(bw, bnd.Format, bnd.Unicode, i);
             }
 

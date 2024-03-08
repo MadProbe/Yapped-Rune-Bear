@@ -12,9 +12,9 @@ namespace SoulsFormats.Binder {
             // Don't actually care about the hashes, I just like asserting
         }
 
-        public static void Write(BinaryWriterEx bw, List<BinderFileHeader> files) {
+        public static void Write(BinaryWriterEx bw, BinderFileHeader[] files) {
             uint groupCount = 0;
-            for (uint p = (uint)files.Count / 7; p <= 100000; p++) {
+            for (uint p = (uint)files.Length / 7; p <= 100000; p++) {
                 if (SFUtil.IsPrime(p)) {
                     groupCount = p;
                     break;
@@ -26,12 +26,12 @@ namespace SoulsFormats.Binder {
             }
 
             var hashLists = new List<PathHash>[groupCount];
-            var pathHashes = new PathHash[files.Count];
+            var pathHashes = new PathHash[files.Length];
             for (int i = 0; i < groupCount; i++) {
                 hashLists[i] = new List<PathHash>();
             }
 
-            for (int i = 0; i < files.Count; i++) {
+            for (int i = 0; i < files.Length; i++) {
                 var pathHash = new PathHash(i, files[i].Name);
                 hashLists[pathHash.Hash % groupCount].Add(pathHash);
                 pathHashes[i] = pathHash;
@@ -40,7 +40,7 @@ namespace SoulsFormats.Binder {
             var hashGroupsArray = new HashGroup[groupCount];
 
             for (int i = 0, count = 0; i < groupCount; i++) {
-                hashLists[i].Sort((ph1, ph2) => ph1.Hash.CompareTo(ph2.Hash));
+                hashLists[i].Sort((ph1, ph2) => (int)(ph1.Hash - ph2.Hash));
                 hashGroupsArray[i] = new HashGroup(count, -count + (count += hashLists[i].Count));
             }
 
@@ -62,7 +62,7 @@ namespace SoulsFormats.Binder {
             }
         }
 
-        private class PathHash {
+        private struct PathHash {
             public uint Hash;
             public int Index;
 
@@ -82,7 +82,7 @@ namespace SoulsFormats.Binder {
             }
         }
 
-        private class HashGroup {
+        private struct HashGroup {
             public int Index, Length;
 
             public HashGroup(BinaryReaderEx br) {

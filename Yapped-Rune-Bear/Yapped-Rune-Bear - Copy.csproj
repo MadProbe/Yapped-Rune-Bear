@@ -17,15 +17,13 @@
 		<PublishAot>False</PublishAot>
 		<PublishTrimmed>False</PublishTrimmed>
 		<TieredCompilation>True</TieredCompilation>
-		<TrimMode>partial</TrimMode>
-		<CustomResourceTypesSupport>true</CustomResourceTypesSupport>
 		<TieredPGO>True</TieredPGO>
 		<InvariantCulture>True</InvariantCulture>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<LangVersion>preview</LangVersion>
 		<SuppressNETCoreSdkPreviewMessage>True</SuppressNETCoreSdkPreviewMessage>
 	</PropertyGroup>
-	<PropertyGroup>
+	<PropertyGroup Condition="$(PlatformTarget) == 'x64'">
 		<NoWarn>1701;1702;0649;0169;9080;CA1050;9057;9084;NU1701;8500;CA1416</NoWarn>
 	</PropertyGroup>
 	<PropertyGroup>
@@ -140,7 +138,6 @@
 		<Compile Include="Util\AssemblyAdditionalInfoAttribute.cs" />
 		<Compile Include="Util\dragonbox-cs.cs" />
 		<Compile Include="Util\fast-dtoa.cs" />
-		<Compile Include="Util\NamedTimings.cs" />
 		<Compile Include="Util\RefKeeper.cs" />
 		<Compile Include="Util\UTF8FileWriter.cs" />
 		<Compile Include="Util\FileWriter.cs" />
@@ -220,7 +217,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\SoulsFormats\SoulsFormats.csproj" />
 	</ItemGroup>
-	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="cp.exe -r ./Additionals/* ./$(OutDir)" />
-	</Target>-->
+	</Target>
 </Project>

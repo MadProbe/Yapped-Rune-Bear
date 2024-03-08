@@ -1,6 +1,8 @@
-﻿[assembly: IgnoresAccessChecksTo("System.Runtime.CoreLib")]
+﻿using SoulsFormats.Util;
 
-static class Program {
+[assembly: IgnoresAccessChecksTo("System.Runtime.CoreLib")]
+
+static partial class Program {
     [STAThread]
     static void Main(string[] args) {
         try {
@@ -29,7 +31,7 @@ static class Program {
                                         ".bin" or ".parambnd" => ModType.ParamBND,
                                         ".csv" => ModType.CSV,
                                         _ when Directory.Exists(value) => ModType.Folder,
-                                        _ => throw new Exception($"Invalid input file \"{value}\"")
+                                        _ => throw new Exception($"Invalid input file \"{value}\" extension")
                                     }
                                 });
                                 break;
@@ -51,13 +53,15 @@ static class Program {
                 HandleModMerging(baseRegulationBin, mods.ToArray(), outputRegulationBin, backup);
                 return;
             }
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Main());
             Chomp.Main.settings.Save();
         } catch (Exception ex) {
+            File.WriteAllText("./error.txt", ex.ToString());
             Console.WriteLine(ex);
+        } finally {
+            Tracing.Stream.Dispose();
         }
     }
     static void HandleModMerging(string @base, Mod[] mods, string outputFile, bool backup) {
@@ -65,7 +69,7 @@ static class Program {
     }
 }
 
-readonly record struct Mod(ModType type, string path) { }
+readonly record struct Mod(ModType type, string path);
 
 enum ModType : byte {
     ParamBND,

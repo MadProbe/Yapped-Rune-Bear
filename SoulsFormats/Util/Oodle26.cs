@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace SoulsFormats.Util {
+﻿namespace SoulsFormats.Util {
     internal static partial class Oodle26 {
         public static unsafe byte[] Compress(byte[] source, OodleLZ_Compressor compressor, OodleLZ_CompressionLevel level) {
             OodleLZ_CompressOptions options = *(OodleLZ_CompressOptions*)OodleLZ_CompressOptions_GetDefault(compressor, level);
@@ -8,12 +6,9 @@ namespace SoulsFormats.Util {
             options.seekChunkReset = true;
             // This is already the default but I am including it for authenticity to game code
             options.seekChunkLen = 0x40000;
-            var pOptions = new OodleLZ_CompressOptions();
-
-            pOptions = options;
             long compressedBufferSizeNeeded = OodleLZ_GetCompressedBufferSizeNeeded(source.LongLength);
             byte[] compBuf = GC.AllocateUninitializedArray<byte>((int)compressedBufferSizeNeeded);
-            long compLen = OodleLZ_Compress(compressor, source, source.LongLength, compBuf, level, (nint)(&pOptions), 0, 0, 0, 0);
+            long compLen = OodleLZ_Compress(compressor, source, source.LongLength, compBuf, level, (nint)(&options), 0, 0, 0, 0);
             Array.Resize(ref compBuf, (int)compLen);
             return compBuf;
         }
@@ -68,7 +63,7 @@ namespace SoulsFormats.Util {
             OodleLZ_CompressionLevel lzLevel);
 
         private static nint OodleLZ_CompressOptions_GetDefault()
-            => OodleLZ_CompressOptions_GetDefault(OodleLZ_Compressor.OodleLZ_Compressor_Invalid, OodleLZ_CompressionLevel.OodleLZ_CompressionLevel_Normal);
+            => OodleLZ_CompressOptions_GetDefault(OodleLZ_Compressor.OodleLZ_Compressor_Invalid, OodleLZ_CompressionLevel.OodleLZ_CompressionLevel_Optimal);
 
 
         /// <param name="compBuf"></param>
